@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b12" />
+  <title>LED_REWORK — Галерея работ</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:#070b12;color:#fff;-webkit-tap-highlight-color:transparent}
+    header{position:sticky;top:0;z-index:5;background:rgba(7,11,18,.94);backdrop-filter:blur(12px);border-bottom:1px solid #162238}
+    .wrap{max-width:1180px;margin:auto;padding:18px}.top{display:flex;gap:16px;align-items:center;justify-content:space-between}
+    .brand{font-weight:900;letter-spacing:1px;font-size:24px}.brand span{color:#4da3ff}.sub{color:#91a0b8;font-size:13px;margin-top:3px}
+    .btn{border:0;border-radius:14px;padding:13px 16px;font-weight:800;cursor:pointer;background:#1677ff;color:#fff;font-size:15px}.btn.secondary{background:#111b2b;border:1px solid #243551}.btn.danger{background:#2a1218;border:1px solid #6d2636;color:#ffb5c1}.btn:active{transform:scale(.98)}
+    .hero{padding:30px 18px 8px}.hero-box{max-width:1180px;margin:auto;background:linear-gradient(135deg,#0d1727,#0b1020);border:1px solid #172743;border-radius:26px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+    .hero h1{margin:0 0 8px;font-size:clamp(28px,8vw,52px)}.hero p{margin:0;color:#9fb0c8;max-width:720px;line-height:1.6}
+    .toolbar{max-width:1180px;margin:20px auto 0;padding:0 18px;display:flex;gap:12px;flex-wrap:wrap}.search{flex:1;min-width:220px;background:#0e1624;border:1px solid #1c2a42;color:#fff;border-radius:14px;padding:14px;outline:none;font-size:16px}
+    .grid{max-width:1180px;margin:auto;padding:22px 18px 60px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+    .folder{background:#0c1422;border:1px solid #1a2940;border-radius:20px;overflow:hidden;cursor:pointer;transition:.2s;min-height:210px}.folder:hover{transform:translateY(-3px);border-color:#2b69a8}
+    .folder-cover{height:155px;background:linear-gradient(135deg,#0d2748,#111827);display:flex;align-items:center;justify-content:center;overflow:hidden}.folder-cover img{width:100%;height:100%;object-fit:cover;display:block}.folder-cover .fallback{font-size:46px}.folder-body{padding:16px}.folder-title{font-size:18px;font-weight:900}.folder-desc{color:#b4c0d2;font-size:13px;margin-top:7px;line-height:1.4;min-height:18px}.folder-meta{color:#91a0b8;font-size:13px;margin-top:7px}.folder-actions{display:flex;gap:8px;margin-top:12px}.mini-btn{border:1px solid #29415f;background:#111b2b;color:#d9e9ff;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:800;cursor:pointer}.mini-btn.danger{color:#ff9aad;border-color:#633040;background:#231219}
+    .empty{max-width:1180px;margin:20px auto;padding:34px 18px;text-align:center;color:#91a0b8;border:1px dashed #27405f;border-radius:20px}
+    dialog{border:1px solid #203655;background:#0b1220;color:#fff;border-radius:22px;padding:0;max-width:560px;width:calc(100% - 24px)}dialog::backdrop{background:rgba(0,0,0,.72)}
+    .modal{padding:22px}.modal h2{margin-top:0}.field{margin:13px 0}.field label{display:block;font-size:13px;color:#9fb0c8;margin-bottom:7px}.field input,.field textarea{width:100%;background:#09101b;border:1px solid #243551;color:#fff;border-radius:12px;padding:13px;outline:none;font-size:16px}.field textarea{min-height:90px;resize:vertical}.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+    .file-picker{display:block;border:1px dashed #3c6596;background:#0a1a2d;border-radius:16px;padding:20px;text-align:center;cursor:pointer}.file-picker strong{display:block;font-size:17px;margin-bottom:6px}.file-picker span{display:block;color:#91a0b8;font-size:13px;line-height:1.45}.file-picker input{display:none}.selected{margin-top:10px;color:#a9cfff;font-size:13px;line-height:1.5}
+    .gallery-head{max-width:1180px;margin:0 auto;padding:20px 18px;display:flex;gap:12px;align-items:center;justify-content:space-between}.gallery-title{font-size:26px;font-weight:900}.gallery-grid{max-width:1180px;margin:auto;padding:0 18px 60px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+    .media{background:#0c1422;border:1px solid #1a2940;border-radius:18px;overflow:hidden}.media img,.media video{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#000}.media-body{padding:12px}.media-title{font-weight:800}.media-desc{font-size:13px;color:#91a0b8;margin-top:5px}.media-actions{display:flex;justify-content:flex-end;margin-top:10px}.delete-link{background:transparent;border:0;color:#ff879b;cursor:pointer;padding:4px 0}
+    .back{background:transparent;color:#8fc4ff;border:0;font-size:16px;cursor:pointer;padding:8px 0}.small{font-size:12px;color:#7f8da1}.notice{font-size:12px;color:#7f8da1;line-height:1.5;margin-top:10px}.progress{display:none;margin-top:12px;color:#a9cfff;font-size:13px}
+    @media(max-width:620px){.top{align-items:flex-start;flex-direction:column}.top .btn{width:100%}.hero-box{padding:22px}.gallery-head{align-items:flex-start;flex-direction:column}.gallery-head .btn{width:100%}.gallery-grid{grid-template-columns:1fr}.actions .btn{flex:1;min-width:120px}}
+  </style>
+</head>
+<body>
+<header><div class="wrap top"><div><div class="brand">LED_<span>REWORK</span></div><div class="sub">Фото и видео выполненных работ</div></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn secondary" id="loginBtn">Войти</button><button class="btn" id="addFolderBtn" style="display:none">+ Добавить раздел</button></div></div></header>
+<section class="hero" id="homeHero"><div class="hero-box"><h1>Галерея моих работ</h1><p>Выберите раздел. Фото и видео можно добавлять прямо с телефона из галереи. Материалы сохраняются на этом устройстве.</p></div></section>
+<div class="toolbar" id="toolbar"><input class="search" id="search" placeholder="Поиск раздела..." /></div>
+<main id="app"></main>
+
+<dialog id="folderDialog"><form method="dialog" class="modal" id="folderForm"><h2 id="folderDialogTitle">Новый раздел</h2><div class="field"><label>Название раздела</label><input id="folderName" required placeholder="Например: Приора с навигацией" /></div><div class="field"><label>Описание раздела</label><textarea id="folderDesc" placeholder="Например: Пересвет, ремонт и прошивка щитков Приора"></textarea></div><div class="field"><label>Ссылка на картинку папки</label>
+<input id="folderCoverUrl" type="url" placeholder="https://example.com/photo.jpg" />
+<div class="notice">Если вставить прямую ссылку на изображение, эту обложку увидят все клиенты.</div>
+</div>
+<div class="field"><label>Или выбрать картинку с телефона</label>
+<label class="file-picker" for="folderCoverFile"><strong>🖼 Выбрать картинку</strong><span>Локальная картинка сохранится только в этом браузере</span><input id="folderCoverFile" type="file" accept="image/*" /></label>
+<div class="selected" id="selectedCover">Картинка не выбрана</div>
+<div id="coverPreview" style="margin-top:10px"></div>
+</div><div class="actions"><button class="btn secondary" value="cancel">Отмена</button><button class="btn" id="saveFolder" value="default">Сохранить</button></div></form></dialog>
+
+<dialog id="mediaDialog"><form method="dialog" class="modal" id="mediaForm"><h2>Добавить фото или видео</h2>
+  <div class="field"><label>Ссылка на фото или видео</label><input id="mediaUrl" type="url" placeholder="https://example.com/photo.jpg" /></div>
+  <div class="field"><label>Тип ссылки</label><select id="mediaUrlType" style="width:100%;background:#09101b;border:1px solid #243551;color:#fff;border-radius:12px;padding:13px;font-size:16px"><option value="image">Фото</option><option value="video">Видео</option></select></div>
+  <div class="notice">Можно вставить прямую публичную ссылку на фото или видео. Такой материал смогут видеть клиенты на других устройствах.</div>
+  <div style="height:12px"></div>
+  <label class="file-picker" for="mediaFiles"><strong>📷 Выбрать фото или видео</strong><span>Нажмите здесь и выберите один или несколько файлов из галереи телефона</span><input id="mediaFiles" type="file" accept="image/*,video/*" multiple /></label>
+  <div class="selected" id="selectedFiles">Файлы ещё не выбраны</div>
+  <div class="field"><label>Название работы (необязательно)</label><input id="mediaTitle" placeholder="Например: Пересвет щитка" /></div>
+  <div class="field"><label>Описание (необязательно)</label><textarea id="mediaDesc" placeholder="Короткое описание работы"></textarea></div>
+  <div class="notice">Фото и видео сохраняются в памяти браузера этого телефона. Для публикации на настоящем сайте, доступном всем клиентам, понадобится сервер или облачное хранилище.</div>
+  <div class="progress" id="saveProgress">Сохраняю файлы…</div>
+  <div class="actions"><button class="btn secondary" value="cancel">Отмена</button><button class="btn" id="saveMedia" value="default">Добавить</button></div>
+</form></dialog>
+
+<dialog id="editMediaDialog"><form method="dialog" class="modal" id="editMediaForm"><h2>Изменить фото / видео</h2>
+  <div class="field"><label>Название работы</label><input id="editMediaTitle" placeholder="Например: Пересвет щитка" /></div>
+  <div class="field"><label>Описание</label><textarea id="editMediaDesc" placeholder="Короткое описание работы"></textarea></div>
+  <div class="actions"><button class="btn secondary" value="cancel">Отмена</button><button class="btn" id="saveMediaEdit" value="default">Сохранить</button></div>
+</form></dialog>
+
+<dialog id="loginDialog"><form method="dialog" class="modal" id="loginForm">
+  <h2>Вход администратора</h2>
+  <div class="field"><label>Логин</label><input id="loginUser" autocomplete="username" placeholder="Введите логин" /></div>
+  <div class="field"><label>Пароль</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="Введите пароль" /></div>
+  <div class="notice" id="loginMessage">После входа будут доступны добавление, изменение и удаление материалов.</div>
+  <div class="actions"><button class="btn secondary" value="cancel">Отмена</button><button class="btn" id="doLogin" value="default">Войти</button></div>
+</form></dialog>
+
+<script>
+const makeId=()=> (crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
+
+// ДАННЫЕ ДЛЯ ВХОДА АДМИНИСТРАТОРА.
+// При желании можно изменить эти две строки прямо в HTML-файле.
+const ADMIN_LOGIN='admin';
+const ADMIN_PASSWORD='admin123';
+
+let isAdmin=sessionStorage.getItem('ledAdmin')==='1';
+const initialFolders=[
+ {id:makeId(),name:'Приора 1',desc:'Фото и видео работ по Приоре',icon:'🚗',items:[]},
+ {id:makeId(),name:'Гранта',desc:'Фото и видео работ по Гранте',icon:'⚡',items:[]},
+ {id:makeId(),name:'Газель',desc:'Фото и видео работ по Газели',icon:'🚐',items:[]},
+];
+let folders=JSON.parse(localStorage.getItem('ledFolders')||'null')||initialFolders;
+let currentFolder=null;
+const app=document.getElementById('app');
+const loginDialog=document.getElementById('loginDialog');
+const loginBtn=document.getElementById('loginBtn');
+const loginUser=document.getElementById('loginUser');
+const loginPass=document.getElementById('loginPass');
+const loginMessage=document.getElementById('loginMessage');
+const search=document.getElementById('search');
+const folderDialog=document.getElementById('folderDialog');
+const mediaDialog=document.getElementById('mediaDialog');
+const folderForm=document.getElementById('folderForm');
+const mediaForm=document.getElementById('mediaForm');
+const folderName=document.getElementById('folderName');
+const folderDesc=document.getElementById('folderDesc');
+const folderCoverUrl=document.getElementById('folderCoverUrl');
+const folderCoverFile=document.getElementById('folderCoverFile');
+const selectedCover=document.getElementById('selectedCover');
+const coverPreview=document.getElementById('coverPreview');
+const folderDialogTitle=document.getElementById('folderDialogTitle');
+const editMediaDialog=document.getElementById('editMediaDialog');
+const editMediaForm=document.getElementById('editMediaForm');
+const editMediaTitle=document.getElementById('editMediaTitle');
+const editMediaDesc=document.getElementById('editMediaDesc');
+let editingFolderId=null;
+let editingMediaId=null;
+let pendingCoverData='';
+const mediaFiles=document.getElementById('mediaFiles');
+const mediaUrl=document.getElementById('mediaUrl');
+const mediaUrlType=document.getElementById('mediaUrlType');
+const mediaTitle=document.getElementById('mediaTitle');
+const mediaDesc=document.getElementById('mediaDesc');
+const selectedFiles=document.getElementById('selectedFiles');
+const saveProgress=document.getElementById('saveProgress');
+
+function saveMeta(){localStorage.setItem('ledFolders',JSON.stringify(folders))}
+function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open('LED_REWORK_MEDIA',1);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains('files'))db.createObjectStore('files')};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+async function putBlob(id,blob){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').put(blob,id);tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}})}
+async function getBlob(id){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('files','readonly');const r=tx.objectStore('files').get(id);r.onsuccess=()=>{db.close();resolve(r.result)};r.onerror=()=>{db.close();reject(r.error)}})}
+async function deleteBlob(id){if(!id)return;const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').delete(id);tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}})}
+
+function updateAuthUI(){
+  loginBtn.textContent=isAdmin?'Выйти':'Войти';
+  document.getElementById('addFolderBtn').style.display=isAdmin?'block':'none';
+}
+function adminOnly(){if(!isAdmin){loginMessage.textContent='Сначала войдите как администратор.';loginDialog.showModal();return false}return true}
+
+function renderHome(){currentFolder=null;document.getElementById('homeHero').style.display='block';document.getElementById('toolbar').style.display='flex';document.getElementById('addFolderBtn').style.display=isAdmin?'block':'none';
+ const q=(search.value||'').toLowerCase(); const list=folders.filter(f=>f.name.toLowerCase().includes(q));
+ app.innerHTML=list.length?`<div class="grid">${list.map(f=>`<article class="folder"><div onclick="openFolder('${f.id}')"><div class="folder-cover">${(f.coverUrl||f.cover)?`<img src="${escAttr(f.coverUrl||f.cover)}" alt="${escAttr(f.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"> <span class="fallback" style="display:none">📁</span>`:`<span class="fallback">📁</span>`}</div><div class="folder-body"><div class="folder-title">${esc(f.name)}</div><div class="folder-desc">${esc(f.desc||'')}</div><div class="folder-meta">${f.items.length} материалов</div></div></div><div class="folder-body" style="padding-top:0">${isAdmin?`<div class="folder-actions"><button class="mini-btn" onclick="event.stopPropagation();editFolder('${f.id}')">✏️ Изменить</button><button class="mini-btn danger" onclick="event.stopPropagation();removeFolder('${f.id}')">Удалить</button></div>`:''}</div></article>`).join('')}</div>`:`<div class="empty">Разделов пока нет. Нажмите «Добавить раздел».</div>`;
+}
+async function openFolder(id){currentFolder=folders.find(f=>f.id===id);if(!currentFolder)return;document.getElementById('homeHero').style.display='none';document.getElementById('toolbar').style.display='none';document.getElementById('addFolderBtn').style.display='none';
+ app.innerHTML=`<div class="gallery-head"><div><button class="back" onclick="renderHome()">← На главную</button><div class="gallery-title">${esc(currentFolder.name)}</div>${currentFolder.desc?`<div class="media-desc" style="margin-top:7px">${esc(currentFolder.desc)}</div>`:''}<div class="small" style="margin-top:6px">${currentFolder.items.length} материалов</div></div>${isAdmin?`<button class="btn" onclick="openMediaDialog()">+ Добавить фото/видео</button>`:''}</div><div id="galleryArea"></div>`;
+ await renderGallery();
+}
+async function renderGallery(){const area=document.getElementById('galleryArea');if(!area||!currentFolder)return;if(!currentFolder.items.length){area.innerHTML='<div class="empty">В этом разделе пока нет фото или видео.</div>';return}
+ area.innerHTML=`<div class="gallery-grid">${currentFolder.items.map(i=>`<article class="media"><div id="media-${i.id}"><div class="empty" style="margin:0;border:0;border-radius:0">Загрузка…</div></div><div class="media-body"><div class="media-title">${esc(i.title||'Без названия')}</div>${i.desc?`<div class="media-desc">${esc(i.desc)}</div>`:''}${isAdmin?`<div class="media-actions" style="gap:12px"><button class="mini-btn" onclick="editMedia('${i.id}')">✏️ Изменить</button><button class="delete-link" onclick="removeMedia('${i.id}')">Удалить</button></div>`:''}</div></article>`).join('')}</div>`;
+ for(const item of currentFolder.items){const holder=document.getElementById('media-'+item.id);if(!holder)continue;try{let src='';if(item.blobId){const blob=await getBlob(item.blobId);if(blob)src=URL.createObjectURL(blob)}else if(item.url){src=item.url}if(!src){holder.innerHTML='<div class="empty" style="margin:0;border:0;border-radius:0">Файл не найден</div>';continue}holder.innerHTML=item.type==='video'?`<video src="${escAttr(src)}" controls playsinline preload="metadata"></video>`:`<img src="${escAttr(src)}" alt="${escAttr(item.title||'Фото работы')}" />`;}catch(e){holder.innerHTML='<div class="empty" style="margin:0;border:0;border-radius:0">Не удалось открыть файл</div>'}}
+}
+function openMediaDialog(){if(!adminOnly())return;mediaForm.reset();selectedFiles.textContent='Файлы ещё не выбраны';saveProgress.style.display='none';mediaDialog.showModal()}
+mediaFiles.addEventListener('change',()=>{const files=[...mediaFiles.files];selectedFiles.textContent=files.length?`Выбрано: ${files.length} — ${files.map(f=>f.name).join(', ')}`:'Файлы ещё не выбраны'})
+function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))} function escAttr(s=''){return esc(s)}
+search.addEventListener('input',renderHome);
+document.getElementById('addFolderBtn').onclick=()=>{if(!adminOnly())return;editingFolderId=null;pendingCoverData='';folderDialogTitle.textContent='Новый раздел';folderForm.reset();folderCoverUrl.value='';selectedCover.textContent='Картинка не выбрана';coverPreview.innerHTML='';folderDialog.showModal()};
+
+folderCoverFile.addEventListener('change',()=>{const file=folderCoverFile.files&&folderCoverFile.files[0];if(!file){pendingCoverData='';selectedCover.textContent='Картинка не выбрана';coverPreview.innerHTML='';return}const r=new FileReader();r.onload=()=>{pendingCoverData=r.result;selectedCover.textContent='Выбрано: '+file.name;coverPreview.innerHTML=`<img src="${escAttr(pendingCoverData)}" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px">`};r.readAsDataURL(file)});
+
+function editFolder(id){if(!adminOnly())return;const f=folders.find(x=>x.id===id);if(!f)return;editingFolderId=id;pendingCoverData=f.cover||'';folderDialogTitle.textContent='Изменить раздел';folderName.value=f.name||'';folderDesc.value=f.desc||'';folderCoverUrl.value=f.coverUrl||'';folderCoverFile.value='';selectedCover.textContent=f.cover?'Текущая локальная картинка сохранена':'Картинка не выбрана';const previewSrc=f.coverUrl||f.cover||'';coverPreview.innerHTML=previewSrc?`<img src="${escAttr(previewSrc)}" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px">`:'';folderDialog.showModal()}
+
+async function removeFolder(id){if(!adminOnly())return;const f=folders.find(x=>x.id===id);if(!f)return;if(!confirm(`Удалить раздел «${f.name}» и все его фото/видео?`))return;for(const item of (f.items||[])){try{await deleteBlob(item.blobId)}catch(e){console.error(e)}}folders=folders.filter(x=>x.id!==id);saveMeta();renderHome()}
+
+document.getElementById('saveFolder').onclick=(e)=>{e.preventDefault();const name=folderName.value.trim();if(!name)return;const desc=folderDesc.value.trim();const coverUrl=folderCoverUrl.value.trim();if(editingFolderId){const f=folders.find(x=>x.id===editingFolderId);if(f){f.name=name;f.desc=desc;f.coverUrl=coverUrl;f.cover=pendingCoverData||f.cover||''}}else{folders.push({id:makeId(),name,desc,coverUrl,cover:pendingCoverData||'',items:[]})}saveMeta();editingFolderId=null;pendingCoverData='';folderForm.reset();folderDialog.close();renderHome()}
+document.getElementById('saveMedia').onclick=async(e)=>{e.preventDefault();if(!currentFolder)return;
+ const files=[...mediaFiles.files];const url=mediaUrl.value.trim();
+ if(!files.length&&!url){selectedFiles.textContent='Выберите файл или вставьте ссылку на фото/видео.';return}
+ saveProgress.style.display='block';
+ try{
+   if(url){
+     currentFolder.items.push({id:makeId(),url,type:mediaUrlType.value,title:mediaTitle.value.trim()||'Без названия',desc:mediaDesc.value.trim()});
+     saveMeta();
+   }
+   for(let n=0;n<files.length;n++){
+     const file=files[n];const blobId=makeId();saveProgress.textContent=`Сохраняю ${n+1} из ${files.length}…`;
+     await putBlob(blobId,file);const type=file.type.startsWith('video/')?'video':'image';
+     currentFolder.items.push({id:makeId(),blobId,type,title:mediaTitle.value.trim()||(files.length===1?file.name:''),desc:mediaDesc.value.trim(),fileName:file.name});saveMeta()
+   }
+   mediaDialog.close();await openFolder(currentFolder.id)
+ }catch(err){saveProgress.textContent='Не удалось сохранить материал.';console.error(err)}
+}
+function editMedia(id){if(!adminOnly())return;if(!currentFolder)return;const item=currentFolder.items.find(x=>x.id===id);if(!item)return;editingMediaId=id;editMediaTitle.value=item.title||'';editMediaDesc.value=item.desc||'';editMediaDialog.showModal()}
+document.getElementById('saveMediaEdit').onclick=async(e)=>{e.preventDefault();if(!currentFolder||!editingMediaId)return;const item=currentFolder.items.find(x=>x.id===editingMediaId);if(!item)return;item.title=editMediaTitle.value.trim();item.desc=editMediaDesc.value.trim();saveMeta();editingMediaId=null;editMediaDialog.close();await openFolder(currentFolder.id)}
+async function removeMedia(id){if(!adminOnly())return;if(!currentFolder)return;const item=currentFolder.items.find(x=>x.id===id);if(!item)return;if(!confirm('Удалить этот материал?'))return;await deleteBlob(item.blobId);currentFolder.items=currentFolder.items.filter(x=>x.id!==id);saveMeta();await openFolder(currentFolder.id)}
+loginBtn.onclick=()=>{
+  if(isAdmin){
+    isAdmin=false;
+    sessionStorage.removeItem('ledAdmin');
+    updateAuthUI();
+    renderHome();
+    return;
+  }
+  loginUser.value='';
+  loginPass.value='';
+  loginMessage.textContent='После входа будут доступны добавление, изменение и удаление материалов.';
+  loginDialog.showModal();
+};
+
+document.getElementById('doLogin').onclick=(e)=>{
+  e.preventDefault();
+  if(loginUser.value===ADMIN_LOGIN && loginPass.value===ADMIN_PASSWORD){
+    isAdmin=true;
+    sessionStorage.setItem('ledAdmin','1');
+    loginDialog.close();
+    updateAuthUI();
+    renderHome();
+  }else{
+    loginMessage.textContent='Неверный логин или пароль.';
+  }
+};
+
+updateAuthUI();
+renderHome();
+</script>
+</body></html>
