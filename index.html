@@ -1,93 +1,534 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#05070d" />
-  <title>LED_REWORK — Тюнинг щитков приборов</title>
-  <link rel="stylesheet" href="css/style.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05070d">
+<title>LED_REWORK — Авто тюнинг</title>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Arial,sans-serif;background:#05070d;color:#fff;min-height:100vh;background-image:radial-gradient(circle at 15% 10%,rgba(0,119,255,.16),transparent 28%),radial-gradient(circle at 85% 0%,rgba(0,209,255,.12),transparent 25%)}a{color:inherit;text-decoration:none}.wrap{width:min(1120px,92%);margin:auto}
+.topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(18px);background:rgba(4,7,14,.78);border-bottom:1px solid rgba(91,171,255,.14)}.nav{height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px}.mini-brand{font-weight:900;letter-spacing:1.3px;color:#dfeeff}.mini-brand b{color:#1f8cff}.navlinks{display:flex;gap:10px}.iconbtn{width:42px;height:42px;border:1px solid rgba(255,255,255,.10);border-radius:13px;display:grid;place-items:center;background:#0a1120;font-size:20px}
+.hero{padding:28px 0 18px}.logo-panel{position:relative;overflow:hidden;border-radius:28px;border:1px solid rgba(34,133,255,.32);box-shadow:0 22px 80px rgba(0,87,255,.18);background:#07111f}.logo-panel img{width:100%;display:block;aspect-ratio:16/8.4;object-fit:cover;object-position:center 30%}.logo-panel:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 64%,#05070d 100%);pointer-events:none}.hero-caption{text-align:center;margin-top:12px;color:#a7b8cf;font-size:14px;letter-spacing:.4px}
+.search{margin:22px auto 8px;max-width:720px;display:flex;align-items:center;gap:12px;background:#0b1220;border:1px solid #1c2a40;border-radius:18px;padding:0 16px;height:56px}.search input{width:100%;background:transparent;border:0;outline:0;color:white;font-size:16px}.search input::placeholder{color:#71829a}
+.section-title{margin:34px 0 16px}.section-title small{color:#2e92ff;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}.section-title h2{font-size:clamp(25px,5vw,38px);margin:7px 0 8px}.section-title p{margin:0;color:#91a1b7}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{position:relative;min-height:150px;padding:19px;border-radius:21px;background:linear-gradient(145deg,#0b1424,#09101c);border:1px solid rgba(49,132,236,.27);overflow:hidden;transition:.2s}.card:hover{transform:translateY(-2px);border-color:#2389ff;box-shadow:0 10px 35px rgba(0,109,255,.13)}.num{font-size:12px;font-weight:900;color:#57aaff;letter-spacing:1.5px}.card h3{font-size:20px;margin:20px 38px 6px 0}.card p{font-size:13px;line-height:1.5;color:#8294ad;margin:0}.go{position:absolute;right:16px;top:16px;width:34px;height:34px;border-radius:50%;border:1px solid #248dff;display:grid;place-items:center;color:#64b0ff}.featured{border-color:#187fff;background:linear-gradient(145deg,#0c1b34,#09101c)}
+.contacts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:28px 0 50px}.contact{border-radius:22px;padding:20px;background:#0a1220;border:1px solid #1b2c44}.contact .label{color:#8697ad;font-size:13px}.contact strong{display:block;font-size:20px;margin:7px 0 14px}.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:14px;padding:13px 16px;font-weight:800}.ig{background:linear-gradient(90deg,#a126ff,#ff2e78,#ff9625)}.wa{background:linear-gradient(90deg,#0dbb56,#27e47c)}footer{border-top:1px solid #111d2d;padding:26px 0 34px;color:#6f8097;text-align:center;font-size:13px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;z-index:99}.overlay.show{display:flex}.sheet{width:100%;background:#09111e;border-radius:26px 26px 0 0;border-top:1px solid #267fdc;padding:24px 20px 34px;animation:up .25s ease}@keyframes up{from{transform:translateY(100%)}to{transform:none}}.sheet h3{margin:0 0 8px;font-size:25px}.sheet p{color:#93a4bb;line-height:1.55}.close{float:right;background:#162236;color:white;border:0;border-radius:12px;padding:10px 14px}
+@media(max-width:700px){.wrap{width:min(94%,720px)}.nav{height:58px}.logo-panel{border-radius:20px}.logo-panel img{aspect-ratio:4/3;object-position:center 24%}.grid{grid-template-columns:1fr}.card{min-height:135px}.contacts{grid-template-columns:1fr}.hero{padding-top:16px}}
+
+/* Compact mobile-first layout */
+body{background:#03060b}
+.wrap{width:min(100% - 24px,430px)}
+.topbar{position:relative;background:transparent;border-bottom:0}.nav{height:54px}.mini-brand{font-size:14px}.iconbtn{width:36px;height:36px;border-radius:11px;font-size:17px}
+.hero{padding:8px 0 10px}.logo-panel{width:100%;max-height:185px;border-radius:20px;box-shadow:0 14px 34px rgba(0,104,255,.18)}.logo-panel img{aspect-ratio:16/7.5;object-fit:cover;object-position:center 44%}.hero-caption{font-size:11px;margin-top:9px;color:#8ea4bd}
+.section-title{margin:18px 0 12px}.section-title small{font-size:10px}.section-title h2{font-size:21px;margin:4px 0}.section-title p{font-size:12px}
+.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{min-height:92px;padding:14px 10px;border-radius:18px;display:flex;align-items:flex-end;justify-content:center;text-align:center;background:linear-gradient(145deg,rgba(21,38,66,.96),rgba(5,12,23,.98));border:1px solid rgba(50,151,255,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.11),inset 0 -18px 28px rgba(0,0,0,.24),0 8px 18px rgba(0,87,255,.10)}.card:before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(125deg,rgba(255,255,255,.11),transparent 28%,transparent 68%,rgba(35,132,255,.09));pointer-events:none}.card h3{font-size:14px;line-height:1.22;margin:0;position:relative;z-index:1}.card:hover{transform:none}.featured{background:linear-gradient(145deg,rgba(14,59,111,.95),rgba(5,13,25,.98));border-color:#2d97ff}.num,.go,.card p,.search{display:none!important}
+.contacts{grid-template-columns:1fr;gap:10px;margin:18px 0 26px}.contact{border-radius:18px;padding:15px}.contact strong{font-size:17px;margin:5px 0 11px}.btn{width:100%;padding:11px 14px;font-size:14px}footer{padding:18px 0 24px;font-size:11px}
+@media(max-width:360px){.wrap{width:min(100% - 18px,430px)}.grid{gap:8px}.card{min-height:86px;padding:12px 8px}.card h3{font-size:13px}.logo-panel{max-height:165px}}
+
+.logo-panel{max-height:none!important;background:linear-gradient(145deg,#07101e,#02060c)!important;padding:14px 12px!important;display:flex;align-items:center;justify-content:center;gap:12px;aspect-ratio:auto!important}
+.logo-panel img{display:none!important}
+.brand-emblem{width:58px;height:58px;flex:0 0 58px;filter:drop-shadow(0 0 10px rgba(25,132,255,.35))}
+.brand-copy{text-align:left;line-height:1}.brand-copy .brand-name{font-size:23px;font-weight:950;font-style:italic;letter-spacing:-.7px}.brand-copy .brand-name span{color:#258eff}.brand-copy .brand-sub{margin-top:7px;font-size:9px;letter-spacing:1.9px;color:#7f9fc1;font-weight:800}
+.hero-caption{display:none!important}.card{min-height:88px!important}
+@media(max-width:360px){.brand-copy .brand-name{font-size:20px}.brand-emblem{width:52px;height:52px;flex-basis:52px}.card h3{font-size:12.5px!important}}
+
+/* Internal category pages */
+.view{display:none}
+.view.active{display:block}
+.category-view{padding:10px 0 34px}
+.category-head{display:flex;align-items:center;gap:12px;margin:8px 0 18px}
+.back-btn{width:42px;height:42px;flex:0 0 42px;border:1px solid rgba(47,145,255,.5);border-radius:14px;background:linear-gradient(145deg,#101c30,#08101d);color:#fff;font-size:22px;display:grid;place-items:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.09)}
+.category-title{margin:0;font-size:22px;line-height:1.15}
+.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.work-card{border-radius:17px;overflow:hidden;background:linear-gradient(145deg,#0c1728,#060c16);border:1px solid rgba(43,137,239,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 8px 20px rgba(0,70,160,.09)}
+.work-media{aspect-ratio:1/1;background:radial-gradient(circle at 50% 35%,rgba(33,132,255,.18),transparent 42%),linear-gradient(145deg,#0d1a2d,#050a12);display:grid;place-items:center;color:#4f6d91;font-size:34px}
+.work-info{padding:11px}
+.work-info strong{display:block;font-size:13px;margin-bottom:4px}
+.work-info span{font-size:11px;color:#8194ae}
+.category-actions{display:grid;grid-template-columns:1fr;gap:9px;margin-top:14px}
+.empty-note{margin:14px 0 0;padding:13px 14px;border-radius:15px;background:#08111e;border:1px solid rgba(47,145,255,.2);color:#8fa3bd;font-size:12px;line-height:1.5}
+
+
+.work-media img,.work-media video{width:100%;height:100%;object-fit:cover;display:block}
+.work-media{overflow:hidden}
+.media-missing{display:grid;place-items:center;width:100%;height:100%;padding:10px;text-align:center;color:#59708d;font-size:11px}
+.video-card .work-media{aspect-ratio:16/10}
+
+</style>
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-glow glow-one"></div>
-    <div class="hero-glow glow-two"></div>
-    <div class="hero-content">
-      <div class="brand-mark"><span class="brand-dot"></span> LED_REWORK</div>
-      <h1>Тюнинг щитков<br><span>приборов</span></h1>
-      <p class="hero-text">Пересвет • Прошивка • Ремонт • Индивидуальный дизайн</p>
+<div class="topbar"><div class="wrap nav"><div class="mini-brand"><b>LED</b>_REWORK</div><div class="navlinks"><a class="iconbtn" href="https://www.instagram.com/led_rework/" target="_blank" aria-label="Instagram">◎</a><a class="iconbtn" href="https://wa.me/79333004499" target="_blank" aria-label="WhatsApp">◉</a></div></div></div>
+<header class="hero"><div class="wrap"><div class="logo-panel"><svg class="brand-emblem" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#17b7ff"/><stop offset="1" stop-color="#176cff"/></linearGradient></defs><circle cx="50" cy="50" r="42" fill="#050b14" stroke="url(#g)" stroke-width="5"/><path d="M20 60a32 32 0 0 1 60 0" fill="none" stroke="#193d69" stroke-width="6" stroke-linecap="round"/><g stroke="#65bfff" stroke-width="3"><path d="M27 53l-7-3"/><path d="M34 38l-5-6"/><path d="M50 32v-8"/><path d="M66 38l5-6"/><path d="M73 53l7-3"/></g><path d="M50 55L72 39" stroke="#ff3b52" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="55" r="6" fill="#eaf5ff"/></svg><div class="brand-copy"><div class="brand-name"><span>LED</span>_REWORK</div><div class="brand-sub">ТЮНИНГ ПРИБОРНЫХ ПАНЕЛЕЙ</div></div></div></div></header>
+<main class="wrap">
+<div id="homeView" class="view active"><div class="section-title"><small>Наши работы</small><h2>Разделы</h2></div><section class="grid" id="grid">
+<a class="card" href="#priora-vaz2110" data-route="priora-vaz2110"><h3>Приора / ВАЗ 2110</h3></a>
+<a class="card" href="#granta-kalina2" data-route="granta-kalina2"><h3>Гранта и Калина 2</h3></a>
+<a class="card" href="#vaz2114-niva" data-route="vaz2114-niva"><h3>ВАЗ 2114 / 2110 / Нива</h3></a>
+<a class="card" href="#gazel-volga" data-route="gazel-volga"><h3>Газель / Волга</h3></a>
+<a class="card" href="#priora2-nav" data-route="priora2-nav"><h3>Приора 2 с навигацией</h3></a>
+<a class="card" href="#toyota" data-route="toyota"><h3>Toyota</h3></a>
+<a class="card" href="#hyundai" data-route="hyundai"><h3>Hyundai</h3></a>
+<a class="card" href="#salon" data-route="salon"><h3>Пересвет салона</h3></a>
+<a class="card" href="#vaz2109-21099" data-route="vaz2109-21099"><h3>ВАЗ 2109 / 21099</h3></a>
+<a class="card" href="#bmw" data-route="bmw"><h3>BMW</h3></a>
+<a class="card" href="#mercedes" data-route="mercedes"><h3>Mercedes</h3></a>
+<a class="card" href="#kamaz" data-route="kamaz"><h3>КамАЗ</h3></a>
+<a class="card" href="#ford" data-route="ford"><h3>Ford</h3></a>
+<a class="card" href="#largus" data-route="largus"><h3>Ларгус</h3></a>
+<a class="card" href="#vaz2107" data-route="vaz2107"><h3>ВАЗ 2107</h3></a>
+<a class="card" href="#gazel-old" data-route="gazel-old"><h3>Газель Старушка</h3></a>
+<a class="card" href="#gazel-fox" data-route="gazel-fox"><h3>Газель Лисичка</h3></a>
+</section>
+<section class="contacts"><div class="contact"><div class="label">Instagram</div><strong>@led_rework</strong><a class="btn ig" href="https://www.instagram.com/led_rework/" target="_blank">Открыть Instagram</a></div><div class="contact"><div class="label">WhatsApp</div><strong>8 933 300-44-99</strong><a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a></div></section></div>
 
-      <div class="social-row">
-        <a class="social-btn instagram" href="https://www.instagram.com/led_rework/" target="_blank" rel="noopener noreferrer">
-          <span class="social-icon">◎</span>
-          <span><small>Instagram</small><strong>@led_rework</strong></span>
-        </a>
-        <a class="social-btn whatsapp" href="https://wa.me/79333004499" target="_blank" rel="noopener noreferrer">
-          <span class="social-icon">◉</span>
-          <span><small>Написать в WhatsApp</small><strong>8 933 300-44-99</strong></span>
-        </a>
-      </div>
 
-      <div class="search-wrap">
-        <span class="search-icon">⌕</span>
-        <input id="searchInput" type="search" placeholder="Найти марку или раздел..." aria-label="Поиск раздела" />
-      </div>
-    </div>
-  </header>
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/priora-vaz2110/photo1.jpg" alt="Приора / ВАЗ 2110 — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/priora-vaz2110/photo2.jpg" alt="Приора / ВАЗ 2110 — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/priora-vaz2110/photo3.jpg" alt="Приора / ВАЗ 2110 — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/priora-vaz2110/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/priora-vaz2110/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
 
-  <main class="container">
-    <section class="section-head">
-      <div>
-        <span class="eyebrow">Наши работы</span>
-        <h2>Выберите автомобиль</h2>
-        <p>Откройте раздел, чтобы посмотреть фото, описание и примеры работ.</p>
-      </div>
-    </section>
 
-    <section class="folder-grid" id="folderGrid">
-      <a class="folder-card" data-name="приора ваз 2110" href="pages/priora-2110.html">
-        <div class="card-top"><div class="folder-icon">01</div><span class="arrow">↗</span></div>
-        <h3>Приора / ВАЗ 2110</h3><p>Пересвет, ремонт, прошивка и тюнинг.</p><span class="open-link">Смотреть работы</span>
-      </a>
-      <a class="folder-card" data-name="гранта калина 2" href="pages/granta-kalina2.html">
-        <div class="card-top"><div class="folder-icon">02</div><span class="arrow">↗</span></div>
-        <h3>Гранта и Калина 2</h3><p>Щитки приборов, стрелки, подсветка и прошивка.</p><span class="open-link">Смотреть работы</span>
-      </a>
-      <a class="folder-card" data-name="ваз 2114 2110 нива" href="pages/vaz-2114-niva.html">
-        <div class="card-top"><div class="folder-icon">03</div><span class="arrow">↗</span></div>
-        <h3>ВАЗ 2114 / 2110 / Нива</h3><p>Пересвет салона и щитков приборов.</p><span class="open-link">Смотреть работы</span>
-      </a>
-      <a class="folder-card" data-name="газель волга" href="pages/gazel-volga.html">
-        <div class="card-top"><div class="folder-icon">04</div><span class="arrow">↗</span></div>
-        <h3>Газель / Волга</h3><p>Ремонт и индивидуальное оформление приборных панелей.</p><span class="open-link">Смотреть работы</span>
-      </a>
-      <a class="folder-card featured" data-name="приора 2 навигация навигациям итэлма" href="pages/priora2-navigation.html">
-        <div class="card-top"><div class="folder-icon">05</div><span class="mini-badge">ПОПУЛЯРНО</span><span class="arrow">↗</span></div>
-        <h3>Приора 2 с навигацией</h3><p>ИТЭЛМА, навигация, прошивка, дисплей и пересвет.</p><span class="open-link">Смотреть работы</span>
-      </a>
-      <a class="folder-card" data-name="toyota toyoto тойота" href="pages/toyota.html">
-        <div class="card-top"><div class="folder-icon">06</div><span class="arrow">↗</span></div>
-        <h3>Toyota</h3><p>Работы по щиткам и подсветке автомобилей Toyota.</p><span class="open-link">Смотреть работы</span>
-      </a>
-      <a class="folder-card" data-name="hyundai хендай" href="pages/hyundai.html">
-        <div class="card-top"><div class="folder-icon">07</div><span class="arrow">↗</span></div>
-        <h3>Hyundai</h3><p>Подсветка кнопок, щитков и элементов салона.</p><span class="open-link">Смотреть работы</span>
-      </a>
-    </section>
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/granta-kalina2/photo1.jpg" alt="Гранта и Калина 2 — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/granta-kalina2/photo2.jpg" alt="Гранта и Калина 2 — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/granta-kalina2/photo3.jpg" alt="Гранта и Калина 2 — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/granta-kalina2/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/granta-kalina2/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
 
-    <div class="empty-state" id="emptyState" hidden>Ничего не найдено.</div>
 
-    <section class="contact-banner">
-      <div><span class="eyebrow">Есть вопрос?</span><h2>Напишите напрямую в WhatsApp</h2><p>Обсудим щиток, пересвет, ремонт или прошивку.</p></div>
-      <a class="contact-cta" href="https://wa.me/79333004499" target="_blank" rel="noopener noreferrer">Открыть чат →</a>
-    </section>
-  </main>
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/vaz2114-niva/photo1.jpg" alt="ВАЗ 2114 / 2110 / Нива — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/vaz2114-niva/photo2.jpg" alt="ВАЗ 2114 / 2110 / Нива — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/vaz2114-niva/photo3.jpg" alt="ВАЗ 2114 / 2110 / Нива — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/vaz2114-niva/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/vaz2114-niva/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
 
-  <footer>
-    <strong>LED_REWORK</strong>
-    <span>Автоэлектроника • Тюнинг • Ремонт</span>
-    <a href="https://www.instagram.com/led_rework/" target="_blank" rel="noopener noreferrer">Instagram @led_rework</a>
-  </footer>
 
-  <script src="js/app.js"></script>
-</body>
-</html>
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/gazel-volga/photo1.jpg" alt="Газель / Волга — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/gazel-volga/photo2.jpg" alt="Газель / Волга — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/gazel-volga/photo3.jpg" alt="Газель / Волга — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/gazel-volga/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/gazel-volga/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/priora2-nav/photo1.jpg" alt="Приора 2 с навигацией — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/priora2-nav/photo2.jpg" alt="Приора 2 с навигацией — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/priora2-nav/photo3.jpg" alt="Приора 2 с навигацией — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/priora2-nav/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/priora2-nav/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/toyota/photo1.jpg" alt="Toyota — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/toyota/photo2.jpg" alt="Toyota — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/toyota/photo3.jpg" alt="Toyota — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/toyota/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/toyota/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/hyundai/photo1.jpg" alt="Hyundai — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/hyundai/photo2.jpg" alt="Hyundai — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/hyundai/photo3.jpg" alt="Hyundai — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/hyundai/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/hyundai/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/salon/photo1.jpg" alt="Пересвет салона — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/salon/photo2.jpg" alt="Пересвет салона — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/salon/photo3.jpg" alt="Пересвет салона — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/salon/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/salon/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/vaz2109-21099/photo1.jpg" alt="ВАЗ 2109 / 21099 — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/vaz2109-21099/photo2.jpg" alt="ВАЗ 2109 / 21099 — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/vaz2109-21099/photo3.jpg" alt="ВАЗ 2109 / 21099 — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/vaz2109-21099/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/vaz2109-21099/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/bmw/photo1.jpg" alt="BMW — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/bmw/photo2.jpg" alt="BMW — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/bmw/photo3.jpg" alt="BMW — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/bmw/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/bmw/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/mercedes/photo1.jpg" alt="Mercedes — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/mercedes/photo2.jpg" alt="Mercedes — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/mercedes/photo3.jpg" alt="Mercedes — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/mercedes/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/mercedes/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/kamaz/photo1.jpg" alt="КамАЗ — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/kamaz/photo2.jpg" alt="КамАЗ — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/kamaz/photo3.jpg" alt="КамАЗ — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/kamaz/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/kamaz/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/ford/photo1.jpg" alt="Ford — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/ford/photo2.jpg" alt="Ford — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/ford/photo3.jpg" alt="Ford — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/ford/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/ford/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/largus/photo1.jpg" alt="Ларгус — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/largus/photo2.jpg" alt="Ларгус — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/largus/photo3.jpg" alt="Ларгус — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/largus/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/largus/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/vaz2107/photo1.jpg" alt="ВАЗ 2107 — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/vaz2107/photo2.jpg" alt="ВАЗ 2107 — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/vaz2107/photo3.jpg" alt="ВАЗ 2107 — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/vaz2107/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/vaz2107/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/gazel-old/photo1.jpg" alt="Газель Старушка — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/gazel-old/photo2.jpg" alt="Газель Старушка — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/gazel-old/photo3.jpg" alt="Газель Старушка — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/gazel-old/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/gazel-old/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+
+
+  <div class="gallery">
+    <article class="work-card">
+      <div class="work-media"><img src="media/gazel-fox/photo1.jpg" alt="Газель Лисичка — фото 1" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo1.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №1</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/gazel-fox/photo2.jpg" alt="Газель Лисичка — фото 2" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo2.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №2</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card">
+      <div class="work-media"><img src="media/gazel-fox/photo3.jpg" alt="Газель Лисичка — фото 3" onerror="this.parentElement.innerHTML='<div class=&quot;media-missing&quot;>Загрузите<br>photo3.jpg</div>'"></div>
+      <div class="work-info"><strong>Работа №3</strong><span>Описание и цена</span></div>
+    </article>
+    <article class="work-card video-card">
+      <div class="work-media"><video controls preload="metadata"><source src="media/gazel-fox/video1.mp4" type="video/mp4"></video></div>
+      <div class="work-info"><strong>Видео</strong><span>video1.mp4</span></div>
+    </article>
+  </div>
+  <div class="empty-note">Для этого раздела загружайте файлы в <b>media/gazel-fox/</b>: photo1.jpg, photo2.jpg, photo3.jpg и video1.mp4. Чтобы добавить больше работ, можно потом расширить галерею.</div>В этот раздел можно добавить фотографии, видео, название работы, описание и цену. Раздел открывается прямо внутри сайта, без всплывающего окна.</div>
+  <div class="category-actions">
+    <a class="btn wa" href="https://wa.me/79333004499" target="_blank">Написать в WhatsApp</a>
+  </div>
+</section>
+</main>
+<footer><div class="wrap">LED_REWORK • Тюнинг приборных панелей</div></footer>
+<script>
+const allViews = [...document.querySelectorAll('.view')];
+function showRoute() {
+  const route = (location.hash || '#home').slice(1);
+  allViews.forEach(v => v.classList.remove('active'));
+  if (!route || route === 'home') {
+    document.getElementById('homeView').classList.add('active');
+    document.title = 'LED_REWORK — Авто тюнинг';
+  } else {
+    const view = document.getElementById('view-' + route);
+    if (view) {
+      view.classList.add('active');
+      const title = view.querySelector('.category-title');
+      if (title) document.title = title.textContent + ' — LED_REWORK';
+    } else {
+      document.getElementById('homeView').classList.add('active');
+    }
+  }
+  window.scrollTo({top:0, behavior:'instant'});
+}
+window.addEventListener('hashchange', showRoute);
+showRoute();
+</script>
+</body></html>
