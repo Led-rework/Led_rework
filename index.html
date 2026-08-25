@@ -43,6 +43,14 @@ body{margin:0;background:radial-gradient(circle at top,#0b1728 0,#05080d 42%,#03
 .loginbox h2{margin:0 0 10px;font-size:18px} .loginbox p{color:#8ca0b6;font-size:11px;line-height:1.4}
 .close{float:right;background:none!important;width:auto!important;margin:0!important;padding:0!important;color:#8da0b4!important;font-size:20px!important}
 .status{font-size:10px;color:#83a0bb;margin-top:7px;min-height:14px}
+
+.media a{display:block;width:100%;height:100%;text-decoration:none;color:inherit}
+.media img{cursor:zoom-in}
+.open-note{font-size:10px;color:#6f8aa5;margin-top:5px}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;z-index:50;padding:12px}
+.lightbox.show{display:flex}
+.lightbox img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:10px}
+.lightbox-close{position:absolute;right:14px;top:14px;width:42px;height:42px;border:0;border-radius:50%;background:#142235;color:#fff;font-size:26px}
 </style>
 </head>
 <body>
@@ -137,12 +145,18 @@ async function route() {
 }
 addEventListener("hashchange", route);
 
-async function yandexDirect(publicUrl) {
-  const api = "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=" + encodeURIComponent(publicUrl);
+async function yandexMeta(publicUrl) {
+  const api = "https://cloud-api.yandex.net/v1/disk/public/resources"
+    + "?public_key=" + encodeURIComponent(publicUrl)
+    + "&preview_size=XL&preview_crop=false";
   const r = await fetch(api);
-  if (!r.ok) throw new Error("Не удалось получить файл с Яндекс Диска");
-  const j = await r.json();
-  return j.href;
+  if (!r.ok) throw new Error("Не удалось получить данные с Яндекс Диска");
+  return await r.json();
+}
+
+async function yandexPreview(publicUrl) {
+  const j = await yandexMeta(publicUrl);
+  return j.preview || j.file || null;
 }
 
 async function loadGallery() {
@@ -160,14 +174,27 @@ async function loadGallery() {
     const art = document.createElement("article"); art.className="item";
     const media = document.createElement("div"); media.className="media";
     try {
-      const direct = await yandexDirect(row.yandex_url);
       if (row.media_type === "video") {
-        const v=document.createElement("video"); v.controls=true; v.preload="metadata"; v.src=direct; media.append(v);
+        const a=document.createElement("a");
+        a.href=row.yandex_url; a.target="_blank"; a.rel="noopener";
+        a.innerHTML='<div style="width:100%;height:100%;display:grid;place-items:center;font-size:34px">▶</div>';
+        media.append(a);
       } else {
-        const im=document.createElement("img"); im.loading="lazy"; im.src=direct; media.append(im);
+        const preview = await yandexPreview(row.yandex_url);
+        const a=document.createElement("a");
+        a.href=row.yandex_url; a.target="_blank"; a.rel="noopener";
+        const im=document.createElement("img");
+        im.loading="lazy";
+        im.alt=row.caption || "Фото работы";
+        im.src=preview || "";
+        im.onerror=()=>{ a.innerHTML='<div style="width:100%;height:100%;display:grid;place-items:center;text-align:center;padding:12px;color:#7f98b2;font-size:11px">Нажмите, чтобы открыть фото<br>на Яндекс Диске</div>'; };
+        a.append(im); media.append(a);
       }
     } catch(e) {
-      media.innerHTML='<span style="font-size:10px;color:#789">Не удалось открыть</span>';
+      const a=document.createElement("a");
+      a.href=row.yandex_url; a.target="_blank"; a.rel="noopener";
+      a.innerHTML='<div style="width:100%;height:100%;display:grid;place-items:center;text-align:center;padding:12px;color:#7f98b2;font-size:11px">Превью не загрузилось.<br>Нажмите, чтобы открыть на Яндекс Диске</div>';
+      media.append(a);
     }
     const info=document.createElement("div"); info.className="info";
     const b=document.createElement("b"); b.textContent=row.caption || "Работа";
@@ -208,7 +235,7 @@ $("#addMedia").onclick=async()=>{
   const url=$("#yandexUrl").value.trim();
   if(!url) return;
   $("#addStatus").textContent="Проверяю ссылку…";
-  try { await yandexDirect(url); } catch(e) { $("#addStatus").textContent=e.message; return; }
+  try { await yandexMeta(url); } catch(e) { $("#addStatus").textContent=e.message; return; }
   const {error}=await db.from("media").insert({
     category:currentCat,
     media_type:$("#mediaType").value,
