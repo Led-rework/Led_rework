@@ -3,259 +3,789 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05080d">
 <title>LED_REWORK</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#05080d;--panel:#0a1019;--line:#173a62;--blue:#1686ff;--text:#eef6ff;--muted:#89a0ba}
+:root{
+  --bg:#05080d; --panel:#09121e; --panel2:#0d1a2a; --line:#183d64;
+  --blue:#1689ff; --blue2:#54b7ff; --text:#f4f8ff; --muted:#8095ad;
+  --green:#20d56b; --danger:#ff5867;
+}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at top,#0b1728 0,#05080d 42%,#030507 100%);color:var(--text);font-family:Arial,sans-serif;min-height:100vh}
-.wrap{max-width:520px;margin:auto;padding:14px 12px 28px}
-.logo{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 16px}
-.logo-badge{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#111c2d,#06101c);border:1px solid #1f70bd;box-shadow:inset 0 1px 0 #ffffff18,0 0 20px #0b79ff2e;display:grid;place-items:center;font-size:24px}
-.logo strong{font-size:20px;letter-spacing:.8px}
-.logo small{display:block;color:#7e9bb8;font-size:10px;margin-top:2px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.card{min-height:74px;padding:12px;border-radius:18px;text-decoration:none;color:#fff;display:flex;align-items:end;background:linear-gradient(145deg,#101b2a,#08101a);border:1px solid #1b5083;box-shadow:inset 0 1px 0 #ffffff17, inset 0 -18px 30px #00000021,0 8px 20px #0007}
-.card:active{transform:scale(.985)} .card span{font-weight:700;font-size:13px;line-height:1.15}
-.contacts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
-.btn{border:0;border-radius:15px;padding:13px 10px;text-align:center;text-decoration:none;color:#fff;font-weight:700;font-size:12px;background:#0b1623;border:1px solid #1a4c78}
-.wa{background:linear-gradient(145deg,#0b271a,#07180f);border-color:#1f7047}
-.ig{background:linear-gradient(145deg,#231126,#100916);border-color:#71356b}
-.admin-link{display:block;margin:16px auto 0;background:none;border:0;color:#4c6480;font-size:11px;padding:6px}
-.view{display:none} .view.active{display:block}
-.head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.back{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;text-decoration:none;color:#fff;background:#0d1724;border:1px solid #1a5e9b;font-size:22px}
-.head h1{font-size:20px;margin:0}
-.gallery{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.item{background:#09111b;border:1px solid #153c61;border-radius:17px;overflow:hidden}
-.media{aspect-ratio:1/1;background:#050a10;display:grid;place-items:center;overflow:hidden}
-.media img,.media video{width:100%;height:100%;object-fit:cover;display:block}
-.info{padding:10px} .info b{display:block;font-size:12px} .info span{display:block;color:#87a0b9;font-size:10px;margin-top:4px;white-space:pre-wrap}
-.empty{grid-column:1/-1;color:#71879f;text-align:center;padding:28px 12px;border:1px dashed #214362;border-radius:17px;font-size:12px}
-.adminbar{display:none;margin:12px 0;padding:12px;border-radius:17px;background:#07111c;border:1px solid #1d5f99}
-.adminbar.show{display:block}
-.adminbar input,.adminbar select,.loginbox input{width:100%;margin:5px 0;padding:11px 12px;border-radius:12px;border:1px solid #244764;background:#040a11;color:#fff;font-size:13px}
-.adminbar button,.loginbox button{width:100%;margin-top:7px;padding:11px;border-radius:12px;border:0;background:#147df1;color:#fff;font-weight:700}
-.del{margin-top:7px;border:0;background:#211015;color:#ff8793;border-radius:9px;padding:7px 9px;font-size:10px;display:none}
-.admin .del{display:inline-block}
-.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:18px;z-index:10}
-.modal.show{display:flex} .loginbox{width:min(100%,380px);background:#0a111b;border:1px solid #20547d;border-radius:20px;padding:18px}
-.loginbox h2{margin:0 0 10px;font-size:18px} .loginbox p{color:#8ca0b6;font-size:11px;line-height:1.4}
-.close{float:right;background:none!important;width:auto!important;margin:0!important;padding:0!important;color:#8da0b4!important;font-size:20px!important}
-.status{font-size:10px;color:#83a0bb;margin-top:7px;min-height:14px}
+html{scroll-behavior:smooth}
+body{
+  margin:0; min-height:100vh; color:var(--text); font-family:Inter,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(22,137,255,.19),transparent 34%),
+    linear-gradient(180deg,#07111d 0,#04070b 45%,#030507 100%);
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(100%,540px);margin:auto;padding:14px 12px 34px}
 
-.media a{display:block;width:100%;height:100%;text-decoration:none;color:inherit}
+/* HERO / LOGO */
+.hero{
+  position:relative; overflow:hidden; margin:4px 0 16px; padding:18px 16px 15px;
+  border:1px solid rgba(57,149,244,.3); border-radius:24px;
+  background:
+    linear-gradient(145deg,rgba(14,28,46,.96),rgba(5,10,17,.96)),
+    radial-gradient(circle at 80% 0,rgba(32,143,255,.25),transparent 40%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 18px 45px rgba(0,0,0,.3);
+}
+.hero:after{
+  content:""; position:absolute; inset:auto -20% -65% 15%; height:150px;
+  background:radial-gradient(ellipse,rgba(14,119,255,.22),transparent 60%);
+  pointer-events:none;
+}
+.brand{display:flex;align-items:center;gap:13px;position:relative;z-index:1}
+.brand-icon{
+  width:64px;height:64px;border-radius:18px;display:grid;place-items:center;
+  background:linear-gradient(145deg,#101820,#05080c);
+  border:1px solid rgba(113,196,255,.48);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 10px 30px rgba(0,0,0,.32),0 0 24px rgba(20,139,255,.15);
+}
+.brand-icon svg{width:50px;height:50px;filter:drop-shadow(0 0 8px rgba(49,168,255,.28))}
+.brand h1{
+  margin:0;font-size:25px;font-weight:950;font-style:normal;letter-spacing:1.7px;line-height:1;
+  color:#f7fbff;text-shadow:0 0 18px rgba(39,153,255,.2)
+}
+.brand h1 span{color:#35aaff}
+.brand p{margin:6px 0 0;color:#8da5bb;font-size:10px;font-weight:650;letter-spacing:.48px}
+.hero-strip{
+  display:grid;grid-template-columns:1fr;gap:7px;margin-top:14px;position:relative;z-index:1
+}
+.hero-chip{
+  padding:9px 8px;border-radius:12px;text-align:center;font-size:9px;line-height:1.25;color:#9eb4ca;
+  background:rgba(3,9,15,.55);border:1px solid rgba(47,111,175,.25)
+}
+
+/* SECTION TITLE */
+.section-head{display:flex;align-items:end;justify-content:space-between;margin:18px 2px 10px}
+.section-head small{display:block;color:#277fcf;font-size:9px;font-weight:800;letter-spacing:1.8px}
+.section-head h2{margin:3px 0 0;font-size:21px}
+.count{font-size:10px;color:#6f8399}
+
+/* FOLDERS */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.folder{
+  position:relative; min-height:100px; padding:11px; border-radius:20px;
+  display:flex;flex-direction:column;justify-content:flex-start;text-decoration:none;color:#fff;
+  overflow:hidden;
+  background:
+    linear-gradient(145deg,rgba(17,33,53,.97),rgba(7,14,24,.98));
+  border:1px solid rgba(43,125,207,.47);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.1),
+    inset 0 -25px 40px rgba(0,0,0,.2),
+    0 9px 22px rgba(0,0,0,.18);
+}
+.folder:before{
+  content:"";position:absolute;left:-20%;top:-60%;width:135%;height:90%;
+  background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.07) 48%,transparent 70%);
+  transform:rotate(-7deg);pointer-events:none
+}
+.folder:after{
+  content:"";position:absolute;right:-28px;top:-30px;width:90px;height:90px;border-radius:50%;
+  background:radial-gradient(circle,rgba(28,132,255,.18),transparent 68%);
+}
+.folder:active{transform:scale(.985)}
+.folder h3{margin:2px 0 0;font-size:14px;line-height:1.18;position:relative;z-index:1;font-weight:800}
+.folder p{
+  margin:9px 0 0;color:#9ab0c5;font-size:12px;line-height:1.38;position:relative;z-index:1;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+}
+.folder-admin{
+  position:absolute;right:7px;top:7px;z-index:3;display:none;gap:5px
+}
+.admin .folder-admin{display:flex}
+.mini{
+  width:29px;height:29px;border-radius:9px;border:1px solid #275982;background:#0a1724;
+  color:#cfe6ff;font-size:12px;display:grid;place-items:center;padding:0
+}
+.mini.danger{border-color:#6e3039;color:#ff9da6;background:#1c0d12}
+
+/* CONTACTS */
+.contacts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}
+.contact{
+  min-height:72px;border-radius:18px;padding:12px;text-decoration:none;color:#fff;
+  display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.09);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)
+}
+.contact .ico{font-size:24px}
+.contact b{display:block;font-size:12px}.contact span{display:block;font-size:9px;color:#b4c2cf;margin-top:3px}
+.ig{background:linear-gradient(145deg,#231126,#100915)}
+.wa{background:linear-gradient(145deg,#092719,#06160e)}
+
+/* VIEWS */
+.view{display:none}.view.active{display:block}
+.head{display:flex;align-items:center;gap:10px;margin:4px 0 12px}
+.back{
+  width:42px;height:42px;border-radius:14px;display:grid;place-items:center;text-decoration:none;
+  color:#fff;background:linear-gradient(145deg,#12243a,#08121e);border:1px solid #236ca9;font-size:22px
+}
+.head-copy{min-width:0}
+.head h2{font-size:20px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.head p{margin:4px 0 0;color:#8297ad;font-size:10px;line-height:1.35}
+
+.gallery{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item{
+  border-radius:18px;overflow:hidden;background:linear-gradient(145deg,#0b1624,#060c14);
+  border:1px solid rgba(43,126,205,.38);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 9px 22px rgba(0,0,0,.18)
+}
+.media{aspect-ratio:16/10;background:#04080d;display:grid;place-items:center;overflow:hidden}
+.media img,.media video{width:100%;height:100%;object-fit:contain;display:block}
 .media img{cursor:zoom-in}
-.open-note{font-size:10px;color:#6f8aa5;margin-top:5px}
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;z-index:50;padding:12px}
+.info{padding:10px}
+.info b{display:block;font-size:12px;line-height:1.3}
+.info .desc{display:block;font-size:10px;color:#7e94ab;margin-top:4px;white-space:pre-wrap}
+.price-tag{
+  display:inline-block;margin-top:8px;padding:6px 9px;border-radius:10px;
+  background:linear-gradient(145deg,#0872e2,#1ba1ff);color:#fff;font-size:14px;font-weight:800;
+  box-shadow:0 5px 15px rgba(0,123,255,.23)
+}
+.del{display:none;margin-top:7px;border:1px solid #71323a;background:#1d0d12;color:#ff98a2;border-radius:9px;padding:6px 8px;font-size:10px}
+.admin .del{display:inline-block}
+.empty{grid-column:1/-1;padding:30px 15px;text-align:center;color:#72869a;border:1px dashed #21405f;border-radius:18px;font-size:11px}
+
+/* ADMIN */
+.admin-tools{
+  display:none;margin:0 0 12px;padding:12px;border-radius:18px;
+  background:#07111c;border:1px solid #205c90
+}
+.admin-tools.show{display:block}
+.admin-tools h3{font-size:13px;margin:0 0 7px}
+.field,select,textarea{
+  width:100%;margin:5px 0;padding:11px 12px;border-radius:12px;border:1px solid #234665;
+  background:#040a11;color:#fff;outline:none;font-size:12px
+}
+textarea{min-height:78px;resize:vertical}
+.primary,.secondary,.danger-btn{
+  width:100%;margin-top:7px;padding:11px;border-radius:12px;border:0;font-weight:800;font-size:12px
+}
+.primary{background:linear-gradient(145deg,#0878ed,#16a0ff);color:#fff}
+.secondary{background:#132131;color:#d8e8f8;border:1px solid #274a6b}
+.danger-btn{background:#2a1015;color:#ff9aa4;border:1px solid #703039}
+.status{min-height:14px;margin-top:6px;color:#7e9ab5;font-size:10px}
+
+.add-folder{
+  display:none;margin:10px 0 4px;width:100%;padding:12px;border-radius:15px;
+  border:1px dashed #2778bb;background:#07111b;color:#8dc8ff;font-size:12px;font-weight:800
+}
+.admin .add-folder{display:block}
+
+/* BOTTOM ADMIN */
+.admin-bottom{margin-top:26px;padding-top:16px;border-top:1px solid rgba(67,104,140,.18);text-align:center}
+.admin-login-link{background:none;border:0;color:#526a82;font-size:10px;padding:8px 12px}
+.admin-state{font-size:10px;color:#5f7a94;margin-top:5px}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:15px;z-index:50}
+.modal.show{display:flex}
+.dialog{
+  width:min(100%,410px);max-height:90vh;overflow:auto;border-radius:22px;padding:16px;
+  background:linear-gradient(145deg,#0e1a29,#070d15);border:1px solid #236296;
+  box-shadow:0 24px 80px rgba(0,0,0,.5)
+}
+.dialog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.dialog h3{margin:0;font-size:17px}
+.x{width:34px;height:34px;border-radius:11px;border:1px solid #2a4864;background:#101b28;color:#fff;font-size:20px}
+.dialog p{color:#8196aa;font-size:10px;line-height:1.45;margin:0 0 8px}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;z-index:100;padding:12px}
 .lightbox.show{display:flex}
-.lightbox img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:10px}
-.lightbox-close{position:absolute;right:14px;top:14px;width:42px;height:42px;border:0;border-radius:50%;background:#142235;color:#fff;font-size:26px}
+.lightbox img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:12px}
+.lightbox-close{position:absolute;right:14px;top:14px;width:44px;height:44px;border:0;border-radius:50%;background:#16263a;color:#fff;font-size:26px}
+
+
+/* NEWS */
+.news-wrap{margin:0 0 18px}
+.news-list{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 7px;scroll-snap-type:x mandatory}
+.news-list::-webkit-scrollbar{display:none}
+.news-card{
+  min-width:76%;max-width:76%;scroll-snap-align:start;overflow:hidden;border-radius:20px;
+  background:linear-gradient(145deg,#0d1b2b,#070d15);border:1px solid rgba(43,126,205,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 12px 28px rgba(0,0,0,.24)
+}
+.news-media{aspect-ratio:16/9;background:#050a10;overflow:hidden;display:grid;place-items:center}
+.news-media img{width:100%;height:100%;object-fit:contain;display:block;cursor:zoom-in}
+.news-body{padding:12px}
+.news-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.news-title{margin:0;font-size:14px;line-height:1.25}
+.news-date{font-size:9px;color:#6f879e;white-space:nowrap;margin-top:2px}
+.news-desc{margin:7px 0 0;color:#8ba0b4;font-size:10px;line-height:1.45;white-space:pre-wrap}
+.news-price{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:10px;background:linear-gradient(145deg,#0875e7,#1ba2ff);font-size:14px;font-weight:800}
+.news-actions{display:none;gap:6px;margin-top:9px}
+.admin .news-actions{display:flex}
+.news-actions button{flex:1;padding:7px;border-radius:9px;font-size:10px;border:1px solid #2b5278;background:#0d1a28;color:#dcecff}
+.news-actions .danger{border-color:#6f3038;color:#ff9aa4;background:#1f0e13}
+.news-empty{padding:18px;text-align:center;border:1px dashed #21405f;border-radius:18px;color:#71869a;font-size:10px}
+.add-news{
+  display:none;width:100%;margin:8px 0 10px;padding:11px;border-radius:14px;
+  border:1px dashed #2a7fc2;background:#07111b;color:#8fd0ff;font-size:11px;font-weight:800
+}
+.admin .add-news{display:block}
+.source-badge{display:inline-block;margin-top:7px;font-size:9px;color:#77a9d4}
+
+.master-chip{font-size:11px!important;font-weight:750;letter-spacing:.15px;color:#b9cce0!important}
+@media(max-width:360px){.grid{gap:8px}.folder{min-height:108px}.folder h3{font-size:13px}.folder p{font-size:11px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="logo">
-    <div class="logo-badge">◉</div>
-    <div><strong>LED_REWORK</strong><small>Пересвет • ремонт • тюнинг</small></div>
-  </div>
+
+  <header class="hero">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <rect x="7" y="7" width="50" height="50" rx="13" stroke="url(#frame)" stroke-width="2"/>
+          <path d="M18 18v27h14" stroke="#F4FAFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M35 18h8.5c5 0 8.5 3.2 8.5 7.7 0 3.4-2.1 5.8-5.1 6.8L53 45h-6l-5.3-11H40v11h-5V18Z" fill="#36AAFF"/>
+          <path d="M11 51h13" stroke="#1D91F2" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M28 51h7" stroke="#73CFFF" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M39 51h14" stroke="#1D91F2" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="52" cy="12" r="2.2" fill="#FF4F5E"/>
+          <defs>
+            <linearGradient id="frame" x1="10" y1="8" x2="54" y2="57">
+              <stop stop-color="#8EDBFF"/><stop offset=".5" stop-color="#198EF0"/><stop offset="1" stop-color="#0B467E"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div>
+        <h1><span>LED</span>_REWORK</h1>
+        <p>АВТОСВЕТ • ПРИБОРНЫЕ ПАНЕЛИ • ТЮНИНГ</p>
+      </div>
+    </div>
+    <div class="hero-strip master-strip">
+      <div class="hero-chip master-chip">🥷 Мастер: ♻️ Опыт работы 🛠️ 10 лет ✅</div>
+    </div>
+  </header>
 
   <section id="home" class="view active">
-    <div class="grid"><a class="card" href="#cat/priora-vaz2110" data-cat="priora-vaz2110"><span>Приора / ВАЗ 2110</span></a>
-<a class="card" href="#cat/granta-kalina2" data-cat="granta-kalina2"><span>Гранта и Калина 2</span></a>
-<a class="card" href="#cat/vaz2114-niva" data-cat="vaz2114-niva"><span>ВАЗ 2114 / 2110 / Нива</span></a>
-<a class="card" href="#cat/gazel-volga" data-cat="gazel-volga"><span>Газель / Волга</span></a>
-<a class="card" href="#cat/priora2-nav" data-cat="priora2-nav"><span>Приора 2 с навигацией</span></a>
-<a class="card" href="#cat/toyota" data-cat="toyota"><span>Toyota</span></a>
-<a class="card" href="#cat/hyundai" data-cat="hyundai"><span>Hyundai</span></a>
-<a class="card" href="#cat/salon" data-cat="salon"><span>Пересвет салона</span></a>
-<a class="card" href="#cat/vaz2109-21099" data-cat="vaz2109-21099"><span>ВАЗ 2109 / 21099</span></a>
-<a class="card" href="#cat/bmw" data-cat="bmw"><span>BMW</span></a>
-<a class="card" href="#cat/mercedes" data-cat="mercedes"><span>Mercedes</span></a>
-<a class="card" href="#cat/kamaz" data-cat="kamaz"><span>КамАЗ</span></a>
-<a class="card" href="#cat/ford" data-cat="ford"><span>Ford</span></a>
-<a class="card" href="#cat/largus" data-cat="largus"><span>Ларгус</span></a>
-<a class="card" href="#cat/vaz2107" data-cat="vaz2107"><span>ВАЗ 2107</span></a>
-<a class="card" href="#cat/gazel-old" data-cat="gazel-old"><span>Газель Старушка</span></a>
-<a class="card" href="#cat/gazel-fox" data-cat="gazel-fox"><span>Газель Лисичка</span></a></div>
-    <div class="contacts">
-      <a class="btn ig" href="https://instagram.com/led_rework" target="_blank">Instagram</a>
-      <a class="btn wa" href="https://wa.me/79333004499" target="_blank">WhatsApp</a>
+
+    <div class="news-wrap">
+      <div class="section-head">
+        <div><small>СОБЫТИЯ</small><h2>Новости</h2></div>
+        <div class="count">7 дней</div>
+      </div>
+      <button class="add-news" id="addNewsBtn">＋ Добавить новость</button>
+      <div class="news-list" id="newsList"><div class="news-empty">Загрузка новостей…</div></div>
     </div>
-    <button class="admin-link" id="adminOpen">Вход администратора</button>
+
+    <div class="section-head">
+      <div><small>НАШИ РАБОТЫ</small><h2>Разделы</h2></div>
+      <div class="count" id="folderCount"></div>
+    </div>
+    <button class="add-folder" id="addFolderBtn">＋ Добавить новый раздел</button>
+    <div class="grid" id="folderGrid"><div class="empty">Загрузка разделов…</div></div>
+
+    <div class="contacts">
+      <a class="contact ig" href="https://instagram.com/led_rework" target="_blank" rel="noopener">
+        <div class="ico">◎</div><div><b>Instagram</b><span>@led_rework</span></div>
+      </a>
+      <a class="contact wa" href="https://wa.me/79333004499" target="_blank" rel="noopener">
+        <div class="ico">◉</div><div><b>WhatsApp</b><span>8 933 300-44-99</span></div>
+      </a>
+    </div>
+
+    <div class="admin-bottom">
+      <button class="admin-login-link" id="adminOpen">Вход администратора</button>
+      <div class="admin-state" id="adminState"></div>
+    </div>
   </section>
 
   <section id="category" class="view">
-    <div class="head"><a class="back" href="#home">‹</a><h1 id="catTitle"></h1></div>
-    <div class="adminbar" id="adminBar">
-      <select id="mediaType"><option value="image">Фото</option><option value="video">Видео</option></select>
-      <input id="yandexUrl" placeholder="Ссылка Яндекс Диска">
-      <input id="caption" placeholder="Описание">
-      <input id="price" placeholder="Цена (необязательно)">
-      <button id="addMedia">Добавить на сайт</button>
-      <div class="status" id="addStatus"></div>
+    <div class="head">
+      <a class="back" href="#home">‹</a>
+      <div class="head-copy">
+        <h2 id="catTitle">Раздел</h2>
+        <p id="catDescription"></p>
+      </div>
     </div>
+
+    <div class="admin-tools" id="mediaAdmin">
+      <h3>Добавить работу</h3>
+      <select id="mediaType"><option value="image">Фото</option><option value="video">Видео</option></select>
+      <input class="field" id="cloudUrl" placeholder="Ссылка Яндекс Диска или Google Drive">
+      <textarea id="caption" placeholder="Описание работы"></textarea>
+      <input class="field" id="price" placeholder="Цена, например 5 500 ₽">
+      <button class="primary" id="addMediaBtn">Добавить на сайт</button>
+      <div class="status" id="mediaStatus"></div>
+    </div>
+
     <div class="gallery" id="gallery"></div>
+
+    <div class="admin-bottom">
+      <a class="admin-login-link" href="#home">← На главную</a>
+    </div>
   </section>
+
 </div>
 
+<!-- LOGIN -->
 <div class="modal" id="loginModal">
- <div class="loginbox">
-   <button class="close" id="closeLogin">×</button>
-   <h2>Администратор</h2>
-   <p>Вход нужен только тебе. Клиенты этот экран не используют.</p>
-   <input id="email" type="email" placeholder="Email администратора">
-   <input id="password" type="password" placeholder="Пароль">
-   <button id="loginBtn">Войти</button>
-   <button id="logoutBtn" style="display:none;background:#182432">Выйти</button>
-   <div class="status" id="loginStatus"></div>
- </div>
+  <div class="dialog">
+    <div class="dialog-head"><h3>Администратор</h3><button class="x" data-close="loginModal">×</button></div>
+    <p>Только после входа можно менять разделы и добавлять работы.</p>
+    <input class="field" id="email" type="email" placeholder="Email">
+    <input class="field" id="password" type="password" placeholder="Пароль">
+    <button class="primary" id="loginBtn">Войти</button>
+    <button class="secondary" id="logoutBtn" style="display:none">Выйти</button>
+    <div class="status" id="loginStatus"></div>
+  </div>
+</div>
+
+<!-- FOLDER EDIT -->
+<div class="modal" id="folderModal">
+  <div class="dialog">
+    <div class="dialog-head"><h3 id="folderModalTitle">Раздел</h3><button class="x" data-close="folderModal">×</button></div>
+    <input class="field" id="folderName" placeholder="Название раздела">
+    <textarea id="folderDescription" placeholder="Описание раздела (необязательно)"></textarea>
+    <button class="primary" id="saveFolderBtn">Сохранить</button>
+    <div class="status" id="folderStatus"></div>
+  </div>
+</div>
+
+
+<!-- NEWS EDIT -->
+<div class="modal" id="newsModal">
+  <div class="dialog">
+    <div class="dialog-head"><h3 id="newsModalTitle">Новость</h3><button class="x" data-close="newsModal">×</button></div>
+    <input class="field" id="newsTitle" placeholder="Название товара / новости">
+    <textarea id="newsDescription" placeholder="Описание"></textarea>
+    <input class="field" id="newsPrice" placeholder="Цена, например 5 500 ₽">
+    <input class="field" id="newsUrl" placeholder="Ссылка на фото: Яндекс, Google, Instagram, VK или прямая ссылка">
+    <button class="primary" id="saveNewsBtn">Сохранить новость</button>
+    <div class="status" id="newsStatus"></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">×</button>
+  <img id="lightboxImg" alt="Фото работы">
 </div>
 
 <script>
-// ====== ВСТАВЬ ДАННЫЕ SUPABASE ЗДЕСЬ ======
 const SUPABASE_URL = "https://ahahhkklvxfatfpphtnw.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_V2WtZZgmMINGvUpUVnpfPg_T2YRi_6Q";
-// ==========================================
+const db = supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 
-const categories = [["priora-vaz2110","Приора / ВАЗ 2110"],["granta-kalina2","Гранта и Калина 2"],["vaz2114-niva","ВАЗ 2114 / 2110 / Нива"],["gazel-volga","Газель / Волга"],["priora2-nav","Приора 2 с навигацией"],["toyota","Toyota"],["hyundai","Hyundai"],["salon","Пересвет салона"],["vaz2109-21099","ВАЗ 2109 / 21099"],["bmw","BMW"],["mercedes","Mercedes"],["kamaz","КамАЗ"],["ford","Ford"],["largus","Ларгус"],["vaz2107","ВАЗ 2107"],["gazel-old","Газель Старушка"],["gazel-fox","Газель Лисичка"]];
-</script>
-<script>
-const categoryMap = Object.fromEntries(categories);
-const configured = !SUPABASE_URL.includes("PASTE_") && !SUPABASE_PUBLISHABLE_KEY.includes("PASTE_");
-const db = configured ? supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY) : null;
-let currentCat = "";
+const fallbackCategories = [
+  ["priora-vaz2110","Приора / ВАЗ 2110","Пересвет и ремонт приборных панелей"],
+  ["granta-kalina2","Гранта и Калина 2","Пересвет, стрелки, шкалы и прошивка"],
+  ["vaz2114-niva","ВАЗ 2114 / 2110 / Нива","Работы по приборным панелям"],
+  ["gazel-volga","Газель / Волга","Щитки приборов и подсветка"],
+  ["priora2-nav","Приора 2 с навигацией","Навигация, дисплей, пересвет и ремонт"],
+  ["toyota","Toyota","Работы по приборным панелям Toyota"],
+  ["hyundai","Hyundai","Пересвет приборов и кнопок"],
+  ["salon","Пересвет салона","Кнопки, консоль и элементы салона"],
+  ["vaz2109-21099","ВАЗ 2109 / 21099","Пересвет и ремонт щитков"],
+  ["bmw","BMW","Пересвет и тюнинг приборной панели"],
+  ["mercedes","Mercedes","Работы по приборным панелям"],
+  ["kamaz","КамАЗ","Щитки приборов и подсветка"],
+  ["ford","Ford","Пересвет и ремонт приборных панелей"],
+  ["largus","Ларгус","Пересвет и ремонт"],
+  ["vaz2107","ВАЗ 2107","Щитки приборов и подсветка"],
+  ["gazel-old","Газель Старушка","Работы по старым щиткам Газели"],
+  ["gazel-fox","Газель Лисичка","Пересвет и ремонт щитков"]
+];
+
+let categories = [];
+let currentCat = null;
 let isAdmin = false;
+let editSlug = null;
 
 const $ = s => document.querySelector(s);
-function show(id) {
+const esc = s => String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+
+function slugify(name){
+  const base = (name||"section").toLowerCase()
+    .replace(/[а-яё]/g,c=>({
+      а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ё:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",
+      н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"c",ч:"ch",ш:"sh",щ:"sch",
+      ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya"
+    }[c]||c))
+    .replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,38);
+  return (base||"section")+"-"+Date.now().toString(36).slice(-5);
+}
+
+function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   $(id).classList.add("active");
+  scrollTo({top:0,behavior:"instant"});
 }
-async function route() {
-  const h = location.hash || "#home";
-  if (h.startsWith("#cat/")) {
-    currentCat = h.split("/")[1];
-    $("#catTitle").textContent = categoryMap[currentCat] || "Раздел";
-    show("#category");
+
+async function loadCategories(){
+  const {data,error}=await db.from("categories").select("*").order("sort_order",{ascending:true}).order("created_at",{ascending:true});
+  if(error){
+    categories=fallbackCategories.map((x,i)=>({slug:x[0],name:x[1],description:x[2],sort_order:i}));
+  }else{
+    categories=data||[];
+  }
+  renderFolders();
+}
+
+function renderFolders(){
+  const grid=$("#folderGrid");
+  $("#folderCount").textContent=categories.length+" разделов";
+  if(!categories.length){grid.innerHTML='<div class="empty">Пока нет разделов</div>';return}
+  grid.innerHTML=categories.map(c=>`
+    <a class="folder" href="#cat/${encodeURIComponent(c.slug)}">
+      <div class="folder-admin">
+        <button class="mini" onclick="event.preventDefault();event.stopPropagation();openFolderEdit('${esc(c.slug)}')">✎</button>
+        <button class="mini danger" onclick="event.preventDefault();event.stopPropagation();deleteFolder('${esc(c.slug)}')">×</button>
+      </div>
+      <h3>${esc(c.name)}</h3>
+      <p>${esc(c.description||"")}</p>
+    </a>
+  `).join("");
+}
+
+async function route(){
+  const h=location.hash||"#home";
+  if(h.startsWith("#cat/")){
+    const slug=decodeURIComponent(h.slice(5));
+    currentCat=categories.find(c=>c.slug===slug)||{slug,name:"Раздел",description:""};
+    $("#catTitle").textContent=currentCat.name;
+    $("#catDescription").textContent=currentCat.description||"";
+    showView("#category");
     await loadGallery();
-  } else {
-    show("#home");
+  }else{
+    showView("#home");
   }
 }
-addEventListener("hashchange", route);
 
-async function yandexMeta(publicUrl) {
-  const api = "https://cloud-api.yandex.net/v1/disk/public/resources"
-    + "?public_key=" + encodeURIComponent(publicUrl)
-    + "&preview_size=XL&preview_crop=false";
-  const r = await fetch(api);
-  if (!r.ok) throw new Error("Не удалось получить данные с Яндекс Диска");
+function getGoogleDriveId(url){
+  try{
+    const u=new URL(url);
+    const m=u.pathname.match(/\/file\/d\/([^/]+)/);
+    if(m)return m[1];
+    return u.searchParams.get("id");
+  }catch(e){return null}
+}
+function isGoogle(url){return /drive\.google\.com|docs\.google\.com/i.test(url)}
+function isYandex(url){return /disk\.yandex\.(ru|com)|yadi\.sk/i.test(url)}
+
+async function yandexMeta(url){
+  const api="https://cloud-api.yandex.net/v1/disk/public/resources?public_key="+encodeURIComponent(url)+"&preview_size=XL&preview_crop=false";
+  const r=await fetch(api);
+  if(!r.ok)throw new Error("Не удалось получить файл Яндекс Диска");
   return await r.json();
 }
-
-async function yandexPreview(publicUrl) {
-  const j = await yandexMeta(publicUrl);
-  return j.preview || j.file || null;
+async function resolveCloud(url){
+  if(isGoogle(url)){
+    const id=getGoogleDriveId(url);
+    if(!id)throw new Error("Не удалось определить Google Drive файл");
+    return {
+      thumb:`https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1000`,
+      full:`https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w2000`,
+      original:url
+    };
+  }
+  if(isYandex(url)){
+    const j=await yandexMeta(url);
+    return {thumb:j.preview||j.file||null,full:j.file||j.preview||null,original:url};
+  }
+  throw new Error("Поддерживаются Яндекс Диск и Google Drive");
 }
 
-async function loadGallery() {
-  const g = $("#gallery");
-  if (!configured) {
-    g.innerHTML = '<div class="empty">Сайт ещё не подключён к общей базе. Нужно один раз настроить Supabase.</div>';
-    return;
+
+function isInstagram(url){return /instagram\.com/i.test(url)}
+function isVK(url){return /(^|\/\/)(vk\.com|m\.vk\.com)/i.test(url)}
+function isDirectImage(url){return /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url)}
+
+async function resolveAnyImage(url){
+  if(isGoogle(url) || isYandex(url)) return await resolveCloud(url);
+  if(isDirectImage(url)) return {thumb:url,full:url,original:url};
+
+  // Instagram/VK post pages often block browser-side thumbnail extraction.
+  // Keep the original link so the card can still open the source.
+  if(isInstagram(url) || isVK(url)){
+    return {thumb:null,full:null,original:url,social:true};
   }
-  g.innerHTML = '<div class="empty">Загрузка…</div>';
-  const {data,error} = await db.from("media").select("*").eq("category",currentCat).order("created_at",{ascending:false});
-  if (error) { g.innerHTML='<div class="empty">Ошибка загрузки</div>'; return; }
-  if (!data.length) { g.innerHTML='<div class="empty">Пока нет фотографий</div>'; return; }
-  g.innerHTML = "";
-  for (const row of data) {
-    const art = document.createElement("article"); art.className="item";
-    const media = document.createElement("div"); media.className="media";
-    try {
-      if (row.media_type === "video") {
-        const a=document.createElement("a");
-        a.href=row.yandex_url; a.target="_blank"; a.rel="noopener";
-        a.innerHTML='<div style="width:100%;height:100%;display:grid;place-items:center;font-size:34px">▶</div>';
-        media.append(a);
-      } else {
-        const preview = await yandexPreview(row.yandex_url);
-        const a=document.createElement("a");
-        a.href=row.yandex_url; a.target="_blank"; a.rel="noopener";
-        const im=document.createElement("img");
-        im.loading="lazy";
-        im.alt=row.caption || "Фото работы";
-        im.src=preview || "";
-        im.onerror=()=>{ a.innerHTML='<div style="width:100%;height:100%;display:grid;place-items:center;text-align:center;padding:12px;color:#7f98b2;font-size:11px">Нажмите, чтобы открыть фото<br>на Яндекс Диске</div>'; };
-        a.append(im); media.append(a);
+
+  // Other direct/open image URLs may still work.
+  return {thumb:url,full:url,original:url};
+}
+
+async function loadGallery(){
+  const g=$("#gallery");
+  g.innerHTML='<div class="empty">Загрузка…</div>';
+  const {data,error}=await db.from("media").select("*").eq("category",currentCat.slug).order("created_at",{ascending:false});
+  if(error){g.innerHTML='<div class="empty">Ошибка загрузки работ</div>';return}
+  if(!data?.length){g.innerHTML='<div class="empty">В этом разделе пока нет фотографий</div>';return}
+  g.innerHTML="";
+  for(const row of data){
+    const art=document.createElement("article");art.className="item";
+    const media=document.createElement("div");media.className="media";
+    try{
+      if(row.media_type==="video"){
+        const a=document.createElement("a");a.href=row.yandex_url;a.target="_blank";a.rel="noopener";
+        a.style.cssText="width:100%;height:100%;display:grid;place-items:center;text-decoration:none;color:#fff;font-size:34px";
+        a.textContent="▶";media.append(a);
+      }else{
+        const r=await resolveAnyImage(row.yandex_url);
+        const im=document.createElement("img");im.loading="lazy";im.alt=row.caption||"Фото работы";im.src=r.thumb||"";
+        im.onclick=()=>openLightbox(r.full||r.thumb,r.original);
+        im.onerror=()=>{
+          media.innerHTML="";
+          const a=document.createElement("a");a.href=row.yandex_url;a.target="_blank";a.rel="noopener";
+          a.style.cssText="width:100%;height:100%;display:grid;place-items:center;text-align:center;padding:14px;text-decoration:none;color:#7f9ab5;font-size:10px";
+          a.textContent="Открыть фото";
+          media.append(a);
+        };
+        media.append(im);
       }
-    } catch(e) {
-      const a=document.createElement("a");
-      a.href=row.yandex_url; a.target="_blank"; a.rel="noopener";
-      a.innerHTML='<div style="width:100%;height:100%;display:grid;place-items:center;text-align:center;padding:12px;color:#7f98b2;font-size:11px">Превью не загрузилось.<br>Нажмите, чтобы открыть на Яндекс Диске</div>';
-      media.append(a);
+    }catch(e){
+      const a=document.createElement("a");a.href=row.yandex_url;a.target="_blank";a.rel="noopener";
+      a.style.cssText="width:100%;height:100%;display:grid;place-items:center;text-align:center;padding:14px;text-decoration:none;color:#7f9ab5;font-size:10px";
+      a.textContent="Открыть фото";media.append(a);
     }
-    const info=document.createElement("div"); info.className="info";
-    const b=document.createElement("b"); b.textContent=row.caption || "Работа";
-    const s=document.createElement("span"); s.textContent=row.price || "";
-    const del=document.createElement("button"); del.className="del"; del.textContent="Удалить";
-    del.onclick=()=>deleteMedia(row.id);
-    info.append(b,s,del); art.append(media,info); g.append(art);
+    const info=document.createElement("div");info.className="info";
+    const b=document.createElement("b");b.textContent=row.caption||"Работа";
+    const d=document.createElement("span");d.className="desc";d.textContent="";
+    const p=document.createElement("span");p.className="price-tag";p.textContent=row.price||"";if(!row.price)p.style.display="none";
+    const del=document.createElement("button");del.className="del";del.textContent="Удалить";del.onclick=()=>deleteMedia(row.id);
+    info.append(b,d,p,del);art.append(media,info);g.append(art);
   }
-  document.body.classList.toggle("admin",isAdmin);
 }
 
-async function refreshAuth() {
-  if (!db) return;
-  const {data} = await db.auth.getSession();
-  isAdmin = !!data.session;
-  $("#adminBar").classList.toggle("show", isAdmin);
+async function refreshAuth(){
+  const {data}=await db.auth.getSession();
+  isAdmin=!!data.session;
+  document.body.classList.toggle("admin",isAdmin);
+  $("#mediaAdmin").classList.toggle("show",isAdmin);
   $("#logoutBtn").style.display=isAdmin?"block":"none";
   $("#loginBtn").style.display=isAdmin?"none":"block";
-  document.body.classList.toggle("admin",isAdmin);
+  $("#adminState").textContent=isAdmin?"Администратор вошёл":"";
 }
 
 $("#adminOpen").onclick=()=>$("#loginModal").classList.add("show");
-$("#closeLogin").onclick=()=>$("#loginModal").classList.remove("show");
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>$("#"+b.dataset.close).classList.remove("show"));
 
 $("#loginBtn").onclick=async()=>{
-  if(!db){$("#loginStatus").textContent="Сначала подключи Supabase.";return}
   $("#loginStatus").textContent="Вход…";
   const {error}=await db.auth.signInWithPassword({email:$("#email").value.trim(),password:$("#password").value});
   if(error){$("#loginStatus").textContent="Неверный email или пароль";return}
   $("#loginStatus").textContent="Вход выполнен";
   await refreshAuth();
-  setTimeout(()=>$("#loginModal").classList.remove("show"),500);
+  setTimeout(()=>$("#loginModal").classList.remove("show"),400);
 };
+$("#logoutBtn").onclick=async()=>{await db.auth.signOut();await refreshAuth();$("#loginModal").classList.remove("show")};
 
-$("#logoutBtn").onclick=async()=>{ await db.auth.signOut(); isAdmin=false; await refreshAuth(); $("#loginModal").classList.remove("show"); };
-
-$("#addMedia").onclick=async()=>{
-  const url=$("#yandexUrl").value.trim();
-  if(!url) return;
-  $("#addStatus").textContent="Проверяю ссылку…";
-  try { await yandexMeta(url); } catch(e) { $("#addStatus").textContent=e.message; return; }
+$("#addMediaBtn").onclick=async()=>{
+  const url=$("#cloudUrl").value.trim();
+  if(!url)return;
+  $("#mediaStatus").textContent="Проверяю ссылку…";
+  try{await resolveAnyImage(url)}catch(e){$("#mediaStatus").textContent=e.message;return}
   const {error}=await db.from("media").insert({
-    category:currentCat,
+    category:currentCat.slug,
     media_type:$("#mediaType").value,
     yandex_url:url,
     caption:$("#caption").value.trim(),
     price:$("#price").value.trim()
   });
-  if(error){$("#addStatus").textContent="Не удалось сохранить";return}
-  $("#yandexUrl").value=""; $("#caption").value=""; $("#price").value="";
-  $("#addStatus").textContent="Добавлено";
+  if(error){$("#mediaStatus").textContent="Не удалось сохранить";return}
+  $("#cloudUrl").value="";$("#caption").value="";$("#price").value="";
+  $("#mediaStatus").textContent="Добавлено";
   await loadGallery();
 };
 
-async function deleteMedia(id) {
-  if(!confirm("Удалить эту работу?")) return;
+async function deleteMedia(id){
+  if(!confirm("Удалить эту работу?"))return;
   await db.from("media").delete().eq("id",id);
   await loadGallery();
 }
 
-route(); refreshAuth();
+
+let editNewsId = null;
+
+function fmtDate(s){
+  if(!s)return "";
+  try{
+    return new Intl.DateTimeFormat("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date(s));
+  }catch(e){return ""}
+}
+
+async function loadNews(){
+  const list=$("#newsList");
+  const now=new Date().toISOString();
+  const {data,error}=await db.from("news")
+    .select("*")
+    .gt("expires_at",now)
+    .order("created_at",{ascending:false});
+  if(error){
+    list.innerHTML='<div class="news-empty">Новости ещё не подключены. Выполни новый SQL.</div>';
+    return;
+  }
+  if(!data?.length){
+    list.innerHTML='<div class="news-empty">Сейчас нет активных новостей</div>';
+    return;
+  }
+  list.innerHTML="";
+  for(const row of data){
+    const card=document.createElement("article");card.className="news-card";
+    const media=document.createElement("div");media.className="news-media";
+    try{
+      const r=await resolveAnyImage(row.image_url||"");
+      if(r.thumb){
+        const im=document.createElement("img");im.loading="lazy";im.src=r.thumb;im.alt=row.title||"Новость";
+        im.onclick=()=>openLightbox(r.full||r.thumb,r.original);
+        im.onerror=()=>{
+          media.innerHTML="";
+          const a=document.createElement("a");a.href=row.image_url;a.target="_blank";a.rel="noopener";
+          a.style.cssText="width:100%;height:100%;display:grid;place-items:center;text-align:center;padding:14px;text-decoration:none;color:#80a3c2;font-size:10px";
+          a.textContent="Открыть источник";
+          media.append(a);
+        };
+        media.append(im);
+      }else{
+        const a=document.createElement("a");a.href=row.image_url;a.target="_blank";a.rel="noopener";
+        a.style.cssText="width:100%;height:100%;display:grid;place-items:center;text-align:center;padding:14px;text-decoration:none;color:#80a3c2;font-size:10px";
+        a.innerHTML=(isInstagram(row.image_url)?"Instagram":isVK(row.image_url)?"ВКонтакте":"Источник")+"<br>Нажмите, чтобы открыть";
+        media.append(a);
+      }
+    }catch(e){
+      media.innerHTML='<span style="font-size:10px;color:#789">Нет превью</span>';
+    }
+
+    const body=document.createElement("div");body.className="news-body";
+    body.innerHTML=`
+      <div class="news-top">
+        <h3 class="news-title">${esc(row.title||"Новость")}</h3>
+        <span class="news-date">${fmtDate(row.created_at)}</span>
+      </div>
+      <div class="news-desc">${esc(row.description||"")}</div>
+      ${row.price?`<span class="news-price">${esc(row.price)}</span>`:""}
+      ${(isInstagram(row.image_url)||isVK(row.image_url))?`<div class="source-badge">${isInstagram(row.image_url)?"Instagram":"ВКонтакте"}</div>`:""}
+      <div class="news-actions">
+        <button onclick="openNewsEdit(${row.id})">Изменить</button>
+        <button class="danger" onclick="deleteNews(${row.id})">Удалить</button>
+      </div>
+    `;
+    card.append(media,body);list.append(card);
+  }
+}
+
+$("#addNewsBtn").onclick=()=>{
+  editNewsId=null;
+  $("#newsModalTitle").textContent="Новая новость";
+  $("#newsTitle").value="";
+  $("#newsDescription").value="";
+  $("#newsPrice").value="";
+  $("#newsUrl").value="";
+  $("#newsStatus").textContent="";
+  $("#newsModal").classList.add("show");
+};
+
+window.openNewsEdit=async(id)=>{
+  const {data,error}=await db.from("news").select("*").eq("id",id).single();
+  if(error||!data)return;
+  editNewsId=id;
+  $("#newsModalTitle").textContent="Изменить новость";
+  $("#newsTitle").value=data.title||"";
+  $("#newsDescription").value=data.description||"";
+  $("#newsPrice").value=data.price||"";
+  $("#newsUrl").value=data.image_url||"";
+  $("#newsStatus").textContent="";
+  $("#newsModal").classList.add("show");
+};
+
+$("#saveNewsBtn").onclick=async()=>{
+  const title=$("#newsTitle").value.trim();
+  const description=$("#newsDescription").value.trim();
+  const price=$("#newsPrice").value.trim();
+  const image_url=$("#newsUrl").value.trim();
+  if(!title){$("#newsStatus").textContent="Введите название";return}
+  if(!image_url){$("#newsStatus").textContent="Добавьте ссылку на фото/публикацию";return}
+  $("#newsStatus").textContent="Сохраняю…";
+
+  let error;
+  if(editNewsId){
+    ({error}=await db.from("news").update({title,description,price,image_url}).eq("id",editNewsId));
+  }else{
+    const expires_at=new Date(Date.now()+7*24*60*60*1000).toISOString();
+    ({error}=await db.from("news").insert({title,description,price,image_url,expires_at}));
+  }
+  if(error){$("#newsStatus").textContent="Ошибка сохранения. Выполни новый SQL.";return}
+  $("#newsModal").classList.remove("show");
+  await loadNews();
+};
+
+window.deleteNews=async(id)=>{
+  if(!confirm("Удалить эту новость?"))return;
+  await db.from("news").delete().eq("id",id);
+  await loadNews();
+};
+
+/* FOLDER CRUD */
+$("#addFolderBtn").onclick=()=>{
+  editSlug=null;
+  $("#folderModalTitle").textContent="Новый раздел";
+  $("#folderName").value="";
+  $("#folderDescription").value="";
+  $("#folderStatus").textContent="";
+  $("#folderModal").classList.add("show");
+};
+
+window.openFolderEdit=(slug)=>{
+  const c=categories.find(x=>x.slug===slug);if(!c)return;
+  editSlug=slug;
+  $("#folderModalTitle").textContent="Изменить раздел";
+  $("#folderName").value=c.name||"";
+  $("#folderDescription").value=c.description||"";
+  $("#folderStatus").textContent="";
+  $("#folderModal").classList.add("show");
+};
+
+$("#saveFolderBtn").onclick=async()=>{
+  const name=$("#folderName").value.trim();
+  const description=$("#folderDescription").value.trim();
+  if(!name){$("#folderStatus").textContent="Введите название";return}
+  $("#folderStatus").textContent="Сохраняю…";
+  let error;
+  if(editSlug){
+    ({error}=await db.from("categories").update({name,description}).eq("slug",editSlug));
+  }else{
+    const slug=slugify(name);
+    const maxSort=categories.reduce((m,c)=>Math.max(m,Number(c.sort_order)||0),0);
+    ({error}=await db.from("categories").insert({slug,name,description,sort_order:maxSort+10}));
+  }
+  if(error){$("#folderStatus").textContent="Ошибка сохранения. Выполни SQL для categories.";return}
+  await loadCategories();
+  $("#folderModal").classList.remove("show");
+};
+
+window.deleteFolder=async(slug)=>{
+  const c=categories.find(x=>x.slug===slug);
+  if(!confirm(`Удалить раздел «${c?.name||slug}» и все его работы?`))return;
+  await db.from("media").delete().eq("category",slug);
+  const {error}=await db.from("categories").delete().eq("slug",slug);
+  if(error){alert("Не удалось удалить раздел");return}
+  await loadCategories();
+};
+
+function openLightbox(src,fallback){
+  if(!src){if(fallback)open(fallback,"_blank");return}
+  $("#lightboxImg").src=src;
+  $("#lightboxImg").onerror=()=>{$("#lightbox").classList.remove("show");if(fallback)open(fallback,"_blank")};
+  $("#lightbox").classList.add("show");
+}
+$("#lightboxClose").onclick=()=>$("#lightbox").classList.remove("show");
+$("#lightbox").onclick=e=>{if(e.target.id==="lightbox")$("#lightbox").classList.remove("show")};
+
+addEventListener("hashchange",route);
+
+(async()=>{
+  await loadCategories();
+  await loadNews();
+  await refreshAuth();
+  await route();
+})();
 </script>
 </body>
 </html>
