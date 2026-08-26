@@ -229,10 +229,62 @@ textarea{min-height:78px;resize:vertical}
 .admin .add-news{display:block}
 .source-badge{display:inline-block;margin-top:7px;font-size:9px;color:#77a9d4}
 
-.master-chip{font-size:13px!important;font-weight:750;letter-spacing:.15px;color:#b9cce0!important}
+.master-chip{font-size:15px!important;font-weight:750;letter-spacing:.15px;color:#b9cce0!important}
 
 .social-preview-badge{position:absolute;left:8px;top:8px;z-index:3;padding:5px 7px;border-radius:9px;background:rgba(3,9,15,.8);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:9px;font-weight:800}
 .media,.news-media{position:relative}
+
+.media img,.news-media img{
+  width:100%!important;height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  display:block!important;
+  background:#05090f;
+}
+.social-image{
+  object-fit:contain!important;
+  object-position:center center!important;
+  background:#05090f!important;
+}
+.item-actions{display:none;gap:6px;margin-top:8px}
+.admin .item-actions{display:flex}
+.item-actions button{
+  flex:1;padding:7px 8px;border-radius:9px;font-size:10px;
+  border:1px solid #2b5278;background:#0d1a28;color:#dcecff
+}
+.item-actions .danger{border-color:#6f3038;color:#ff9aa4;background:#1f0e13}
+
+
+.buy-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-top:8px;
+}
+.buy-row .price-tag{
+  margin-top:0!important;
+  flex:1;
+  text-align:center;
+}
+.order-btn{
+  flex:1;
+  padding:7px 8px;
+  min-height:34px;
+  border-radius:10px;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:linear-gradient(145deg,#0c8b42,#16c768);
+  border:1px solid rgba(78,235,143,.45);
+  color:#fff;
+  font-size:11px;
+  font-weight:850;
+  box-shadow:0 5px 15px rgba(22,199,104,.18);
+}
+.order-btn:active{transform:scale(.98)}
+
 @media(max-width:360px){.grid{gap:8px}.folder{min-height:108px}.folder h3{font-size:13px}.folder p{font-size:11px}}
 </style>
 </head>
@@ -366,6 +418,26 @@ textarea{min-height:78px;resize:vertical}
   </div>
 </div>
 
+
+<!-- MEDIA EDIT -->
+<div class="modal" id="mediaEditModal">
+  <div class="dialog">
+    <div class="dialog-head">
+      <h3>Изменить работу</h3>
+      <button class="x" data-close="mediaEditModal">×</button>
+    </div>
+    <select id="editMediaType">
+      <option value="image">Фото</option>
+      <option value="video">Видео</option>
+    </select>
+    <input class="field" id="editMediaUrl" placeholder="Ссылка Google Drive, Яндекс Диск, Instagram, VK или JPG/PNG">
+    <textarea id="editMediaCaption" placeholder="Описание работы"></textarea>
+    <input class="field" id="editMediaPrice" placeholder="Цена">
+    <button class="primary" id="saveMediaEditBtn">Сохранить изменения</button>
+    <div class="status" id="editMediaStatus"></div>
+  </div>
+</div>
+
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" id="lightboxClose">×</button>
@@ -474,10 +546,30 @@ function isGoogle(url){return /drive\.google\.com|docs\.google\.com/i.test(url)}
 function isYandex(url){return /disk\.yandex\.(ru|com)|yadi\.sk/i.test(url)}
 
 async function yandexMeta(url){
-  const api="https://cloud-api.yandex.net/v1/disk/public/resources?public_key="+encodeURIComponent(url)+"&preview_size=XL&preview_crop=false";
-  const r=await fetch(api);
+  const api="https://cloud-api.yandex.net/v1/disk/public/resources"
+    +"?public_key="+encodeURIComponent(url)
+    +"&preview_size=XL&preview_crop=false";
+  const r=await fetch(api,{cache:"no-store"});
   if(!r.ok)throw new Error("Не удалось получить файл Яндекс Диска");
-  return await r.json();
+  const j=await r.json();
+
+  // First choice: Yandex-generated preview (worked in earlier version).
+  if(j.preview) return {...j,_bestPreview:j.preview};
+
+  // Fallback: request temporary direct download URL.
+  try{
+    const d=await fetch(
+      "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key="
+      +encodeURIComponent(url),
+      {cache:"no-store"}
+    );
+    if(d.ok){
+      const dj=await d.json();
+      if(dj.href) return {...j,file:dj.href,_bestPreview:dj.href};
+    }
+  }catch(e){}
+
+  return {...j,_bestPreview:j.file||null};
 }
 async function resolveCloud(url){
   if(isGoogle(url)){
@@ -491,7 +583,7 @@ async function resolveCloud(url){
   }
   if(isYandex(url)){
     const j=await yandexMeta(url);
-    return {thumb:j.preview||j.file||null,full:j.file||j.preview||null,original:url};
+    return {thumb:j._bestPreview||j.preview||j.file||null,full:j.file||j._bestPreview||j.preview||null,original:url,platform:"Яндекс Диск"};
   }
   throw new Error("Поддерживаются Яндекс Диск и Google Drive");
 }
@@ -503,10 +595,16 @@ function isVK(url){return /(^|\/\/)(vk\.com|m\.vk\.com)/i.test(url)}
 function isDirectImage(url){return /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url)}
 
 async function fetchMicrolink(url){
-  const r=await fetch("https://api.microlink.io/?url="+encodeURIComponent(url)+"&meta=true");
+  const api="https://api.microlink.io/?url="+encodeURIComponent(url)
+    +"&meta=true&screenshot=true&waitForTimeout=2500";
+  const r=await fetch(api,{cache:"no-store"});
   if(!r.ok) throw new Error("preview");
   const j=await r.json();
-  return j?.data?.image?.url || j?.data?.logo?.url || null;
+  return {
+    image:j?.data?.image?.url||null,
+    screenshot:j?.data?.screenshot?.url||null,
+    logo:j?.data?.logo?.url||null
+  };
 }
 async function fetchNoembed(url){
   const r=await fetch("https://noembed.com/embed?url="+encodeURIComponent(url));
@@ -515,8 +613,18 @@ async function fetchNoembed(url){
   return j?.thumbnail_url || null;
 }
 async function resolveSocialPreview(url){
-  try{const x=await fetchMicrolink(url);if(x)return x}catch(e){}
-  try{const x=await fetchNoembed(url);if(x)return x}catch(e){}
+  try{
+    const x=await fetchMicrolink(url);
+    // Instagram: prefer actual post image.
+    if(isInstagram(url) && x.image) return x.image;
+    // VK: metadata image is often missing; screenshot is more reliable.
+    if(isVK(url) && (x.image||x.screenshot)) return x.image||x.screenshot;
+    if(x.image||x.screenshot||x.logo) return x.image||x.screenshot||x.logo;
+  }catch(e){}
+  try{
+    const x=await fetchNoembed(url);
+    if(x)return x;
+  }catch(e){}
   return null;
 }
 async function resolveAnyImage(url){
@@ -529,6 +637,20 @@ async function resolveAnyImage(url){
   return {thumb:url,full:url,original:url};
 }
 
+
+
+function whatsappOrderLink(row){
+  const title = row.caption || "Работа LED_REWORK";
+  const price = row.price || "Цена не указана";
+  const source = row.yandex_url || "";
+  const text =
+    "Ассаламу Аллайкум! Хочу заказать эту работу:%0A%0A" +
+    "📌 " + encodeURIComponent(title) + "%0A" +
+    "💰 Цена: " + encodeURIComponent(price) + "%0A" +
+    "🖼 Фото/ссылка: " + encodeURIComponent(source) + "%0A%0A" +
+    "Подскажите, пожалуйста, по заказу.";
+  return "https://wa.me/79333004499?text=" + text;
+}
 
 async function loadGallery(){
   const g=$("#gallery");
@@ -547,7 +669,7 @@ async function loadGallery(){
         a.textContent="▶";media.append(a);
       }else{
         const r=await resolveAnyImage(row.yandex_url);
-        const im=document.createElement("img");im.loading="lazy";im.alt=row.caption||"Фото работы";im.src=r.thumb||"";
+        const im=document.createElement("img");im.loading="lazy";im.alt=row.caption||"Фото работы";im.src=r.thumb||""; if(r.social) im.classList.add("social-image");
         im.onclick=()=>openLightbox(r.full||r.thumb,r.original);
         if(r.social){const badge=document.createElement("span");badge.className="social-preview-badge";badge.textContent=r.platform;media.append(badge);}
         im.onerror=()=>{
@@ -567,9 +689,20 @@ async function loadGallery(){
     const info=document.createElement("div");info.className="info";
     const b=document.createElement("b");b.textContent=row.caption||"Работа";
     const d=document.createElement("span");d.className="desc";d.textContent="";
-    const p=document.createElement("span");p.className="price-tag";p.textContent=row.price||"";if(!row.price)p.style.display="none";
-    const del=document.createElement("button");del.className="del";del.textContent="Удалить";del.onclick=()=>deleteMedia(row.id);
-    info.append(b,d,p,del);art.append(media,info);g.append(art);
+    const p=document.createElement("span");p.className="price-tag";p.textContent=row.price||"Уточнить цену";
+    const buyRow=document.createElement("div");buyRow.className="buy-row";
+    const order=document.createElement("a");order.className="order-btn";
+    order.href=whatsappOrderLink(row);order.target="_blank";order.rel="noopener";
+    order.textContent="Заказать";
+    buyRow.append(p,order);
+
+    const actions=document.createElement("div");actions.className="item-actions";
+    const edit=document.createElement("button");edit.textContent="Изменить";
+    edit.onclick=()=>openMediaEdit(row);
+    const del=document.createElement("button");del.className="danger";del.textContent="Удалить";
+    del.onclick=()=>deleteMedia(row.id);
+    actions.append(edit,del);
+    info.append(b,d,buyRow,actions);art.append(media,info);g.append(art);
   }
 }
 
@@ -611,6 +744,46 @@ $("#addMediaBtn").onclick=async()=>{
   if(error){$("#mediaStatus").textContent="Не удалось сохранить";return}
   $("#cloudUrl").value="";$("#caption").value="";$("#price").value="";
   $("#mediaStatus").textContent="Добавлено";
+  await loadGallery();
+};
+
+
+let editMediaId=null;
+
+window.openMediaEdit=(row)=>{
+  editMediaId=row.id;
+  $("#editMediaType").value=row.media_type||"image";
+  $("#editMediaUrl").value=row.yandex_url||"";
+  $("#editMediaCaption").value=row.caption||"";
+  $("#editMediaPrice").value=row.price||"";
+  $("#editMediaStatus").textContent="";
+  $("#mediaEditModal").classList.add("show");
+};
+
+$("#saveMediaEditBtn").onclick=async()=>{
+  if(!editMediaId)return;
+  const yandex_url=$("#editMediaUrl").value.trim();
+  const caption=$("#editMediaCaption").value.trim();
+  const price=$("#editMediaPrice").value.trim();
+  const media_type=$("#editMediaType").value;
+  if(!yandex_url){
+    $("#editMediaStatus").textContent="Добавьте ссылку";
+    return;
+  }
+  $("#editMediaStatus").textContent="Проверяю ссылку…";
+  try{await resolveAnyImage(yandex_url)}catch(e){
+    $("#editMediaStatus").textContent=e.message||"Ссылка не открывается";
+    return;
+  }
+  const {error}=await db.from("media")
+    .update({yandex_url,caption,price,media_type})
+    .eq("id",editMediaId);
+  if(error){
+    $("#editMediaStatus").textContent="Не удалось сохранить";
+    return;
+  }
+  $("#editMediaStatus").textContent="Сохранено";
+  $("#mediaEditModal").classList.remove("show");
   await loadGallery();
 };
 
@@ -680,7 +853,11 @@ async function loadNews(){
         <span class="news-date">${fmtDate(row.created_at)}</span>
       </div>
       <div class="news-desc">${esc(row.description||"")}</div>
-      ${row.price?`<span class="news-price">${esc(row.price)}</span>`:""}
+      <div class="buy-row">
+        ${row.price?`<span class="news-price" style="margin-top:0;flex:1;text-align:center">${esc(row.price)}</span>`:`<span class="news-price" style="margin-top:0;flex:1;text-align:center">Уточнить цену</span>`}
+        <a class="order-btn" target="_blank" rel="noopener"
+           href="${whatsappOrderLink({caption:row.title,price:row.price,yandex_url:row.image_url})}">Заказать</a>
+      </div>
       ${(isInstagram(row.image_url)||isVK(row.image_url))?`<div class="source-badge">${isInstagram(row.image_url)?"Instagram":"ВКонтакте"}</div>`:""}
       <div class="news-actions">
         <button onclick="openNewsEdit(${row.id})">Изменить</button>
