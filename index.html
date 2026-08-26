@@ -335,6 +335,15 @@ textarea{min-height:78px;resize:vertical}
   color:#cfe6ff;background:linear-gradient(145deg,#0d1724,#060b11)
 }
 
+
+.upload-preview{
+  display:none;margin:8px 0;border-radius:14px;overflow:hidden;
+  border:1px solid #244b70;background:#050a10
+}
+.upload-preview.show{display:block}
+.upload-preview img{width:100%;max-height:220px;object-fit:contain;display:block}
+.upload-note{font-size:10px;color:#7890a8;line-height:1.4;margin-top:5px}
+
 @media(max-width:360px){.grid{gap:8px}.folder{min-height:108px}.folder h3{font-size:13px}.folder p{font-size:11px}}
 </style>
 </head>
@@ -394,10 +403,20 @@ textarea{min-height:78px;resize:vertical}
 
     <div class="admin-tools" id="mediaAdmin">
       <h3>Добавить работу</h3>
-      <select id="mediaType"><option value="image">Фото</option><option value="video">Видео</option></select>
-      <input class="field" id="cloudUrl" placeholder="Google Drive, Яндекс Диск, Instagram, VK или JPG/PNG">
+
+      <select id="mediaType">
+        <option value="image">Фото</option>
+        <option value="video">Видео</option>
+      </select>
+
+      <input class="field" id="mediaFile" type="file" accept="image/*,video/*">
+      <div class="upload-preview" id="uploadPreview"><img id="uploadPreviewImg" alt=""></div>
+      <div class="upload-note">Лучший вариант: выбери фото прямо из галереи телефона. Оно загрузится в Supabase Storage и будет стабильно показываться клиентам.</div>
+
+      <input class="field" id="cloudUrl" placeholder="Или вставь ссылку Google Drive / Яндекс Диск / Instagram / VK">
       <textarea id="caption" placeholder="Описание работы"></textarea>
       <input class="field" id="price" placeholder="Цена, например 5 500 ₽">
+
       <button class="primary" id="addMediaBtn">Добавить на сайт</button>
       <div class="status" id="mediaStatus"></div>
     </div>
@@ -672,7 +691,13 @@ async function resolveSocialPreview(url){
   }catch(e){}
   return null;
 }
+function isSupabaseStorage(url){
+  return /supabase\.co\/storage\/v1\/object\/public\//i.test(url);
+}
+
 async function resolveAnyImage(url){
+  if(isSupabaseStorage(url)) return {thumb:url,full:url,original:url,platform:"Supabase"};
+
   if(isGoogle(url)||isYandex(url)) return await resolveCloud(url);
   if(isDirectImage(url)) return {thumb:url,full:url,original:url};
   if(isInstagram(url)||isVK(url)){
@@ -781,11 +806,60 @@ $("#loginBtn").onclick=async()=>{
 };
 $("#logoutBtn").onclick=async()=>{await db.auth.signOut();await refreshAuth();$("#loginModal").classList.remove("show")};
 
+
+$("#mediaFile").addEventListener("change",()=>{
+  const file=$("#mediaFile").files?.[0];
+  const box=$("#uploadPreview");
+  const img=$("#uploadPreviewImg");
+  if(!file){box.classList.remove("show");img.src="";return}
+  if(file.type.startsWith("image/")){
+    img.src=URL.createObjectURL(file);
+    box.classList.add("show");
+  }else{
+    box.classList.remove("show");
+  }
+});
+
+function safeFileName(file){
+  const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
+  return `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext||"jpg"}`;
+}
+
+async function uploadToStorage(file){
+  const path=`${currentCat.slug}/${safeFileName(file)}`;
+  const {error}=await db.storage.from("photos").upload(path,file,{
+    cacheControl:"3600",
+    upsert:false,
+    contentType:file.type||undefined
+  });
+  if(error) throw error;
+  const {data}=db.storage.from("photos").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+
 $("#addMediaBtn").onclick=async()=>{
-  const url=$("#cloudUrl").value.trim();
-  if(!url)return;
-  $("#mediaStatus").textContent="Проверяю ссылку…";
-  try{await resolveAnyImage(url)}catch(e){$("#mediaStatus").textContent=e.message;return}
+  const file=$("#mediaFile").files?.[0]||null;
+  let url=$("#cloudUrl").value.trim();
+
+  if(!file && !url){
+    $("#mediaStatus").textContent="Выбери файл или вставь ссылку";
+    return;
+  }
+
+  $("#mediaStatus").textContent=file?"Загружаю файл…":"Проверяю ссылку…";
+
+  try{
+    if(file){
+      url=await uploadToStorage(file);
+    }else{
+      await resolveAnyImage(url);
+    }
+  }catch(e){
+    $("#mediaStatus").textContent="Ошибка: "+(e.message||"не удалось загрузить");
+    return;
+  }
+
   const {error}=await db.from("media").insert({
     category:currentCat.slug,
     media_type:$("#mediaType").value,
@@ -793,9 +867,19 @@ $("#addMediaBtn").onclick=async()=>{
     caption:$("#caption").value.trim(),
     price:$("#price").value.trim()
   });
-  if(error){$("#mediaStatus").textContent="Не удалось сохранить";return}
-  $("#cloudUrl").value="";$("#caption").value="";$("#price").value="";
-  $("#mediaStatus").textContent="Добавлено";
+
+  if(error){
+    $("#mediaStatus").textContent="Не удалось сохранить карточку";
+    return;
+  }
+
+  $("#mediaFile").value="";
+  $("#cloudUrl").value="";
+  $("#caption").value="";
+  $("#price").value="";
+  $("#uploadPreview").classList.remove("show");
+  $("#uploadPreviewImg").src="";
+  $("#mediaStatus").textContent="Добавлено ✅";
   await loadGallery();
 };
 
