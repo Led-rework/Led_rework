@@ -229,7 +229,10 @@ textarea{min-height:78px;resize:vertical}
 .admin .add-news{display:block}
 .source-badge{display:inline-block;margin-top:7px;font-size:9px;color:#77a9d4}
 
-.master-chip{font-size:11px!important;font-weight:750;letter-spacing:.15px;color:#b9cce0!important}
+.master-chip{font-size:13px!important;font-weight:750;letter-spacing:.15px;color:#b9cce0!important}
+
+.social-preview-badge{position:absolute;left:8px;top:8px;z-index:3;padding:5px 7px;border-radius:9px;background:rgba(3,9,15,.8);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:9px;font-weight:800}
+.media,.news-media{position:relative}
 @media(max-width:360px){.grid{gap:8px}.folder{min-height:108px}.folder h3{font-size:13px}.folder p{font-size:11px}}
 </style>
 </head>
@@ -309,7 +312,7 @@ textarea{min-height:78px;resize:vertical}
     <div class="admin-tools" id="mediaAdmin">
       <h3>Добавить работу</h3>
       <select id="mediaType"><option value="image">Фото</option><option value="video">Видео</option></select>
-      <input class="field" id="cloudUrl" placeholder="Ссылка Яндекс Диска или Google Drive">
+      <input class="field" id="cloudUrl" placeholder="Google Drive, Яндекс Диск, Instagram, VK или JPG/PNG">
       <textarea id="caption" placeholder="Описание работы"></textarea>
       <input class="field" id="price" placeholder="Цена, например 5 500 ₽">
       <button class="primary" id="addMediaBtn">Добавить на сайт</button>
@@ -357,7 +360,7 @@ textarea{min-height:78px;resize:vertical}
     <input class="field" id="newsTitle" placeholder="Название товара / новости">
     <textarea id="newsDescription" placeholder="Описание"></textarea>
     <input class="field" id="newsPrice" placeholder="Цена, например 5 500 ₽">
-    <input class="field" id="newsUrl" placeholder="Ссылка на фото: Яндекс, Google, Instagram, VK или прямая ссылка">
+    <input class="field" id="newsUrl" placeholder="Google Drive, Яндекс Диск, Instagram, VK или JPG/PNG">
     <button class="primary" id="saveNewsBtn">Сохранить новость</button>
     <div class="status" id="newsStatus"></div>
   </div>
@@ -494,23 +497,38 @@ async function resolveCloud(url){
 }
 
 
+
 function isInstagram(url){return /instagram\.com/i.test(url)}
 function isVK(url){return /(^|\/\/)(vk\.com|m\.vk\.com)/i.test(url)}
 function isDirectImage(url){return /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url)}
 
+async function fetchMicrolink(url){
+  const r=await fetch("https://api.microlink.io/?url="+encodeURIComponent(url)+"&meta=true");
+  if(!r.ok) throw new Error("preview");
+  const j=await r.json();
+  return j?.data?.image?.url || j?.data?.logo?.url || null;
+}
+async function fetchNoembed(url){
+  const r=await fetch("https://noembed.com/embed?url="+encodeURIComponent(url));
+  if(!r.ok) throw new Error("preview");
+  const j=await r.json();
+  return j?.thumbnail_url || null;
+}
+async function resolveSocialPreview(url){
+  try{const x=await fetchMicrolink(url);if(x)return x}catch(e){}
+  try{const x=await fetchNoembed(url);if(x)return x}catch(e){}
+  return null;
+}
 async function resolveAnyImage(url){
-  if(isGoogle(url) || isYandex(url)) return await resolveCloud(url);
+  if(isGoogle(url)||isYandex(url)) return await resolveCloud(url);
   if(isDirectImage(url)) return {thumb:url,full:url,original:url};
-
-  // Instagram/VK post pages often block browser-side thumbnail extraction.
-  // Keep the original link so the card can still open the source.
-  if(isInstagram(url) || isVK(url)){
-    return {thumb:null,full:null,original:url,social:true};
+  if(isInstagram(url)||isVK(url)){
+    const img=await resolveSocialPreview(url);
+    return {thumb:img,full:img,original:url,social:true,platform:isInstagram(url)?"Instagram":"ВКонтакте"};
   }
-
-  // Other direct/open image URLs may still work.
   return {thumb:url,full:url,original:url};
 }
+
 
 async function loadGallery(){
   const g=$("#gallery");
@@ -531,6 +549,7 @@ async function loadGallery(){
         const r=await resolveAnyImage(row.yandex_url);
         const im=document.createElement("img");im.loading="lazy";im.alt=row.caption||"Фото работы";im.src=r.thumb||"";
         im.onclick=()=>openLightbox(r.full||r.thumb,r.original);
+        if(r.social){const badge=document.createElement("span");badge.className="social-preview-badge";badge.textContent=r.platform;media.append(badge);}
         im.onerror=()=>{
           media.innerHTML="";
           const a=document.createElement("a");a.href=row.yandex_url;a.target="_blank";a.rel="noopener";
@@ -635,6 +654,7 @@ async function loadNews(){
       if(r.thumb){
         const im=document.createElement("img");im.loading="lazy";im.src=r.thumb;im.alt=row.title||"Новость";
         im.onclick=()=>openLightbox(r.full||r.thumb,r.original);
+        if(r.social){const badge=document.createElement("span");badge.className="social-preview-badge";badge.textContent=r.platform;media.append(badge);}
         im.onerror=()=>{
           media.innerHTML="";
           const a=document.createElement("a");a.href=row.image_url;a.target="_blank";a.rel="noopener";
