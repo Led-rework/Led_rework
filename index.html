@@ -416,6 +416,27 @@ textarea{min-height:78px;resize:vertical}
 .stock-control label{font-size:13px;font-weight:800;color:#dce9f6}
 .stock-control select{width:auto;min-width:145px;margin:0}
 
+
+.visit-counter{
+  width:max-content;
+  max-width:100%;
+  margin:18px auto 8px;
+  padding:8px 14px;
+  border-radius:13px;
+  border:1px solid rgba(40,135,220,.32);
+  background:linear-gradient(145deg,#08121d,#05090e);
+  color:#8fa8bf;
+  font-size:11px;
+  font-weight:750;
+  text-align:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)
+}
+.visit-counter b{
+  color:#dff1ff;
+  font-size:13px;
+  font-weight:950
+}
+
 </style>
 </head>
 <body>
@@ -466,6 +487,8 @@ textarea{min-height:78px;resize:vertical}
       </a>
     </div>
 
+    <div class="visit-counter" id="homeVisitCounter">👁 Посещений: <b>—</b></div>
+
     <div class="admin-bottom">
       <button class="admin-login-link" id="adminOpen">Вход администратора</button>
       <div class="admin-state" id="adminState"></div>
@@ -503,6 +526,8 @@ textarea{min-height:78px;resize:vertical}
     </div>
 
     <div class="gallery" id="gallery"></div>
+
+    <div class="visit-counter" id="categoryVisitCounter">👁 Посещений раздела: <b>—</b></div>
 
     <div class="admin-bottom">
       <a class="admin-login-link" href="#home">← На главную</a>
@@ -668,6 +693,42 @@ function renderFolders(){
   `).join("");
 }
 
+
+function visitStorageKey(pageKey){
+  return "led_rework_visit_" + pageKey;
+}
+
+async function updateVisitCounter(pageKey, elementId, label){
+  const el=document.getElementById(elementId);
+  if(!el)return;
+
+  try{
+    let count=null;
+
+    // A refresh in the same browser tab should not inflate the counter.
+    // Opening the page in a new tab/session counts as a new visit.
+    if(!sessionStorage.getItem(visitStorageKey(pageKey))){
+      const {data,error}=await db.rpc("increment_page_view",{p_page_key:pageKey});
+      if(error) throw error;
+      count=Number(data);
+      sessionStorage.setItem(visitStorageKey(pageKey),"1");
+    }else{
+      const {data,error}=await db
+        .from("page_views")
+        .select("view_count")
+        .eq("page_key",pageKey)
+        .maybeSingle();
+      if(error) throw error;
+      count=Number(data?.view_count||0);
+    }
+
+    el.innerHTML=`👁 ${label}: <b>${count.toLocaleString("ru-RU")}</b>`;
+  }catch(e){
+    console.warn("Visit counter:",e);
+    el.innerHTML=`👁 ${label}: <b>—</b>`;
+  }
+}
+
 async function route(){
   const h=location.hash||"#home";
   if(h.startsWith("#cat/")){
@@ -677,8 +738,10 @@ async function route(){
     $("#catDescription").textContent=currentCat.description||"";
     showView("#category");
     await loadGallery();
+    await updateVisitCounter("category:"+currentCat.slug,"categoryVisitCounter","Посещений раздела");
   }else{
     showView("#home");
+    await updateVisitCounter("home","homeVisitCounter","Посещений");
   }
 }
 
