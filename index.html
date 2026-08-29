@@ -695,7 +695,7 @@ function renderFolders(){
 
 
 function visitStorageKey(pageKey){
-  return "led_rework_visit_" + pageKey;
+  return "led_rework_permanent_visit_" + pageKey;
 }
 
 async function updateVisitCounter(pageKey, elementId, label){
@@ -707,11 +707,11 @@ async function updateVisitCounter(pageKey, elementId, label){
 
     // A refresh in the same browser tab should not inflate the counter.
     // Opening the page in a new tab/session counts as a new visit.
-    if(!sessionStorage.getItem(visitStorageKey(pageKey))){
+    if(!localStorage.getItem(visitStorageKey(pageKey))){
       const {data,error}=await db.rpc("increment_page_view",{p_page_key:pageKey});
       if(error) throw error;
       count=Number(data);
-      sessionStorage.setItem(visitStorageKey(pageKey),"1");
+      localStorage.setItem(visitStorageKey(pageKey),"1");
     }else{
       const {data,error}=await db
         .from("page_views")
