@@ -408,6 +408,14 @@ textarea{min-height:78px;resize:vertical}
 }
 
 @media(max-width:360px){.grid{gap:8px}.folder{min-height:108px}.folder h3{font-size:13px}.folder p{font-size:11px}}
+
+.stock-badge{display:inline-flex;align-items:center;gap:7px;margin:0 0 9px;padding:7px 11px;border-radius:11px;font-size:13px;font-weight:900;border:1px solid}
+.stock-badge.in{color:#7dffad;background:rgba(0,190,90,.13);border-color:rgba(0,220,105,.45);box-shadow:0 0 16px rgba(0,210,100,.10)}
+.stock-badge.out{color:#ff9aa4;background:rgba(255,55,70,.10);border-color:rgba(255,70,85,.42);box-shadow:0 0 16px rgba(255,55,70,.08)}
+.stock-control{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0;padding:11px 12px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:#090e14}
+.stock-control label{font-size:13px;font-weight:800;color:#dce9f6}
+.stock-control select{width:auto;min-width:145px;margin:0}
+
 </style>
 </head>
 <body>
@@ -488,6 +496,7 @@ textarea{min-height:78px;resize:vertical}
       <input class="field" id="cloudUrl" placeholder="Или вставь ссылку Google Drive / Яндекс Диск / Instagram / VK">
       <textarea id="caption" placeholder="Описание работы"></textarea>
       <input class="field" id="price" placeholder="Цена, например 5 500 ₽">
+<div class="stock-control"><label for="stockStatus">Наличие товара</label><select id="stockStatus"><option value="in">● Есть в наличии</option><option value="out">● Нет в наличии</option></select></div>
 
       <button class="primary" id="addMediaBtn">Добавить на сайт</button>
       <div class="status" id="mediaStatus"></div>
@@ -555,6 +564,7 @@ textarea{min-height:78px;resize:vertical}
     <input class="field" id="editMediaUrl" placeholder="Ссылка Google Drive, Яндекс Диск, Instagram, VK или JPG/PNG">
     <textarea id="editMediaCaption" placeholder="Описание работы"></textarea>
     <input class="field" id="editMediaPrice" placeholder="Цена">
+<div class="stock-control"><label for="editStockStatus">Наличие товара</label><select id="editStockStatus"><option value="in">● Есть в наличии</option><option value="out">● Нет в наличии</option></select></div>
     <button class="primary" id="saveMediaEditBtn">Сохранить изменения</button>
     <div class="status" id="editMediaStatus"></div>
   </div>
@@ -797,8 +807,19 @@ async function resolveAnyImage(url){
 
 
 
+
+function unpackStockCaption(raw){
+  raw=raw||"";
+  if(raw.startsWith("[STOCK:OUT]")) return {stock:"out",caption:raw.slice(11).trimStart()};
+  if(raw.startsWith("[STOCK:IN]")) return {stock:"in",caption:raw.slice(10).trimStart()};
+  return {stock:"in",caption:raw};
+}
+function packStockCaption(caption,stock){
+  return (stock==="out"?"[STOCK:OUT]":"[STOCK:IN]") + (caption?(" "+caption):"");
+}
+
 function whatsappOrderLink(row){
-  const title = row.caption || "Работа LED_REWORK";
+  const title = unpackStockCaption(row.caption).caption || "Работа LED_REWORK";
   const price = row.price || "Цена не указана";
   const source = row.yandex_url || "";
   const text =
@@ -852,7 +873,10 @@ async function loadGallery(){
       media.append(a);
     }
     const info=document.createElement("div");info.className="info";
-    const b=document.createElement("b");b.textContent=row.caption||"Работа";
+    const stockData=unpackStockCaption(row.caption);
+    const stock=document.createElement("div");stock.className="stock-badge "+(stockData.stock==="out"?"out":"in");
+    stock.textContent=stockData.stock==="out"?"✕ Нет в наличии":"✓ Есть в наличии";
+    const b=document.createElement("b");b.textContent=stockData.caption||"Работа";
     const d=document.createElement("span");d.className="desc";d.textContent="";
     const p=document.createElement("span");p.className="price-tag";p.textContent=row.price||"Уточнить цену";
     const buyRow=document.createElement("div");buyRow.className="buy-row";
@@ -867,7 +891,7 @@ async function loadGallery(){
     const del=document.createElement("button");del.className="danger";del.textContent="Удалить";
     del.onclick=()=>deleteMedia(row.id);
     actions.append(edit,del);
-    info.append(b,d,buyRow,actions);art.append(media,info);g.append(art);
+    info.append(stock,b,d,buyRow,actions);art.append(media,info);g.append(art);
   }
 }
 
@@ -1011,7 +1035,7 @@ $("#addMediaBtn").onclick=async()=>{
     category:currentCat.slug,
     media_type:$("#mediaType").value,
     yandex_url:url,
-    caption:$("#caption").value.trim(),
+    caption:packStockCaption($("#caption").value.trim(),$("#stockStatus").value),
     price:$("#price").value.trim()
   });
 
@@ -1024,6 +1048,7 @@ $("#addMediaBtn").onclick=async()=>{
   $("#cloudUrl").value="";
   $("#caption").value="";
   $("#price").value="";
+  $("#stockStatus").value="in";
   $("#uploadPreview").classList.remove("show");
   $("#uploadPreviewImg").src="";
   $("#mediaStatus").textContent="Добавлено ✅";
@@ -1037,8 +1062,10 @@ window.openMediaEdit=(row)=>{
   editMediaId=row.id;
   $("#editMediaType").value=row.media_type||"image";
   $("#editMediaUrl").value=row.yandex_url||"";
-  $("#editMediaCaption").value=row.caption||"";
+  const stockData=unpackStockCaption(row.caption);
+  $("#editMediaCaption").value=stockData.caption||"";
   $("#editMediaPrice").value=row.price||"";
+  $("#editStockStatus").value=stockData.stock;
   $("#editMediaStatus").textContent="";
   $("#mediaEditModal").classList.add("show");
 };
@@ -1046,7 +1073,8 @@ window.openMediaEdit=(row)=>{
 $("#saveMediaEditBtn").onclick=async()=>{
   if(!editMediaId)return;
   const yandex_url=$("#editMediaUrl").value.trim();
-  const caption=$("#editMediaCaption").value.trim();
+  const cleanCaption=$("#editMediaCaption").value.trim();
+  const caption=packStockCaption(cleanCaption,$("#editStockStatus").value);
   const price=$("#editMediaPrice").value.trim();
   const media_type=$("#editMediaType").value;
   if(!yandex_url){
